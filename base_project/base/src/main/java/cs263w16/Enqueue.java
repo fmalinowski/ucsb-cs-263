@@ -14,12 +14,20 @@ import com.google.appengine.api.taskqueue.*;
 public class Enqueue extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String key = request.getParameter("keyname");
+        try{
+        	String key = request.getParameter("keyname");
+        	String value = request.getParameter("value");
+        	// Add the task to the default queue.
+        	if(key == "" || value == "")
+        		throw new java.lang.IllegalArgumentException();
+        	
+        	Queue queue = QueueFactory.getDefaultQueue();
+        	queue.add(TaskOptions.Builder.withUrl("/worker").param("keyname", key).param("value", value));
 
-        // Add the task to the default queue.
-        Queue queue = QueueFactory.getDefaultQueue();
-        queue.add(TaskOptions.Builder.withUrl("/worker").param("keyname", key));
-
-        response.sendRedirect("/Done.html");
+        	response.sendRedirect("/Done.html");
+        }
+        catch(Exception e){
+        	response.getWriter().println("Sorry. Please fix the error: " + e.getMessage());
+        }
     }
 }
