@@ -17,29 +17,49 @@ public class DatastoreServlet extends HttpServlet {
       resp.getWriter().println("<html><body>");
       
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+      MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+  	  syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+
       
       if(!req.getParameterNames().hasMoreElements()){  // if no parameters passed in
       	try{
       		Query fetchAllTaskData = new Query("TaskData");
 	      	PreparedQuery results = datastore.prepare(fetchAllTaskData); 
-	      	resp.getWriter().println("There are items of kind \'TaskData\' in the datastore. <br/>");
+	      	resp.getWriter().println("<b><i>Items of kind \'TaskData\' in the datastore. </b></i><br/><br/>");
 	  		for(Entity taskDataElement : results.asIterable()){
-	        	
-	        	resp.getWriter().println("<b> " + taskDataElement.getProperty("value") + "</b><br/>");
-	        	resp.getWriter().println("<b> " + taskDataElement.getProperty("date") + "</b><br/>");
+	        	resp.getWriter().println("<b>Item in datastore</b><br/>");
+	        	if(syncCache.get(taskDataElement.getKey()) != null){
+	        		resp.getWriter().println("<b>Item in memcache as well.</b><br/>");
+	        	}
+	        	resp.getWriter().println("" + taskDataElement.getProperty("value") + "<br/>");
+	        	resp.getWriter().println("" + taskDataElement.getProperty("date") + "<br/><br/>");
 	    	}
+
+
+
 	    }catch(Exception e){
-	    	resp.getWriter().println("Sorry, nothing in the datastore! (or something else went wrong)");
+	    	resp.getWriter().println("Sorry. " + e.getMessage());
 	    }
       }
       else if(req.getParameter("keyname") != null && req.getParameter("value") == null){
       	try{
-      		Entity result = datastore.get(KeyFactory.createKey("TaskData", req.getParameter("keyname")));
-      		resp.getWriter().println("Found Entity in datastore with key: " + req.getParameter("keyname") + "<br/>");
-      		resp.getWriter().println("<b> " + result.getProperty("value") + "</b><br/>");
-        	resp.getWriter().println("<b> " + result.getProperty("date") + "</b><br/>");	
-      	}catch(EntityNotFoundException e){
-      		resp.getWriter().println("Sorry, nothing in the datastore by that key!");
+      		
+      		String result = (String)syncCache.get(KeyFactory.createKey("TaskData", req.getParameter("keyname")));
+      		if(result != null){
+      			resp.getWriter().println("Found Entity in memcache with key: " + req.getParameter("keyname") + "<br/>");
+	      		resp.getWriter().println("<b> " + result + "</b><br/><br/>");
+	        	//date not stored in memcache
+	        	//resp.getWriter().println("<b> " + result.getProperty("date") + "</b><br/>");	
+      		}
+      		else{
+      			Entity result2 = datastore.get(KeyFactory.createKey("TaskData", req.getParameter("keyname")));
+      			syncCache.put(result2.getKey(), result2.getProperty("value")); // Populate cache.
+	      		resp.getWriter().println("Found Entity in datastore with key: " + req.getParameter("keyname") + "<br/>");
+	      		resp.getWriter().println("" + result2.getProperty("value") + "<br/>");
+	        	resp.getWriter().println("" + result2.getProperty("date") + "<br/><br/>");	
+	        }
+      	}catch(Exception e){
+      		resp.getWriter().println("Sorry, no such data! " + e.getMessage());
       	}
       }
       else if(req.getParameter("keyname") != null && req.getParameter("value") != null){
@@ -48,7 +68,8 @@ public class DatastoreServlet extends HttpServlet {
       		ntd.setProperty("value", req.getParameter("value"));
       		ntd.setProperty("date", new Date());
       		datastore.put(ntd);
-      		resp.getWriter().println("Stored KEY: " + req.getParameter("keyname") + " and VALUE: " + req.getParameter("value") + " in Datastore.");
+      		syncCache.put(ntd.getKey(), ntd.getProperty("value")); // Populate cache.
+      		resp.getWriter().println("Stored KEY: " + req.getParameter("keyname") + " and VALUE: " + req.getParameter("value") + " in Datastore and Memcache.");
       	}catch(Exception e){
       		resp.getWriter().println("Something went wrong. " + e.getMessage());	
       	}
