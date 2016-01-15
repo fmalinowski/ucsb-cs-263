@@ -1,6 +1,9 @@
 language: java
+jdk:
+- openjdk7
 env:
   global:
     - REPO="ucsb-cs-263/base_project/base"
     - CI_HOME=`pwd`/$REPO
+before_install: mvn clean install
 install: mvn test
