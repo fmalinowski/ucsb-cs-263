@@ -5,5 +5,5 @@ env:
   global:
     - REPO="ucsb-cs-263/base_project/base"
     - CI_HOME=`pwd`/$REPO
-before_install: cd base_project/base ; mvn clean install
+before_install: cd base_project/base
 install: mvn test
