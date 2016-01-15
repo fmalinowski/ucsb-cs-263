@@ -8,4 +8,23 @@
 	  <servlet-name>datastore</servlet-name>
 	  <url-pattern>/datastore</url-pattern>
 	</servlet-mapping>
+
+	<servlet>
+      <servlet-name>enqueue</servlet-name>
+      <servlet-class>cs263w16.Enqueue</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>enqueue</servlet-name>
+      <url-pattern>/enqueue</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+      <servlet-name>worker</servlet-name>
+      <servlet-class>cs263w16.Worker</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>worker</servlet-name>
+      <url-pattern>/worker</url-pattern>
+    </servlet-mapping>
+
 </web-app>
