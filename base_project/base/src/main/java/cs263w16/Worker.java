@@ -19,7 +19,10 @@ public class Worker extends HttpServlet {
         	Date date = new Date();
         	Entity entity = new Entity("TaskData", key);
         	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-        	entity.setProperty("value", value);
+            MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+            syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+        	syncCache.put(entity.getKey(), value); // Populate cache.
+            entity.setProperty("value", value);
       		entity.setProperty("date", new Date());
       		datastore.put(entity);
         }
