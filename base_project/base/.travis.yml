@@ -1,2 +1,6 @@
 language: java
+env:
+  global:
+    - REPO="ucsb-cs-263/base_project/base"
+    - CI_HOME=`pwd`/$REPO
 install: mvn test
