@@ -12,7 +12,20 @@ import com.google.appengine.api.memcache.*;
 public class Worker extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String key = request.getParameter("keyname");
-        // Do something with key.
+        try{
+        	String key = request.getParameter("keyname");
+        	String value = request.getParameter("value");
+        	// Do something with key.
+        	Date date = new Date();
+        	Entity entity = new Entity("TaskData", key);
+        	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+        	entity.setProperty("value", value);
+      		entity.setProperty("date", new Date());
+      		datastore.put(entity);
+        }
+        catch(Exception e){
+        	response.sendRedirect("/Error.html");
+        }
+
     }
 }
