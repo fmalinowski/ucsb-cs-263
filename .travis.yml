@@ -1,12 +1,9 @@
 language: java
 jdk:
 - openjdk7
-<<<<<<< HEAD:.travis.yml
 env:
   global:
     - REPO="ucsb-cs-263/base_project/base"
     - CI_HOME=`pwd`/$REPO
-=======
->>>>>>> 0540f6125c5966bab366dcf21e321cb68b7893da:base_project/base/.travis.yml
 before_install: mvn clean install
 install: mvn test
