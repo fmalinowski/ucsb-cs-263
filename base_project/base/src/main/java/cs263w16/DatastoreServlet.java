@@ -56,8 +56,8 @@ public class DatastoreServlet extends HttpServlet {
       			syncCache.put(result2.getKey(), result2.getProperty("value")); // Populate cache.
 	      		resp.getWriter().println("Found Entity in datastore with key: " + req.getParameter("keyname") + "<br/>");
 	      		resp.getWriter().println("" + result2.getProperty("value") + "<br/>");
-	        	resp.getWriter().println("" + result2.getProperty("date") + "<br/><br/>");	
-	        }
+	        	      resp.getWriter().println("" + result2.getProperty("date") + "<br/><br/>");	
+	            }
       	}catch(Exception e){
       		resp.getWriter().println("Sorry, no such data! " + e.getMessage());
       	}
