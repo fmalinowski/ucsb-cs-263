@@ -18,7 +18,7 @@ public class DatastoreServlet extends HttpServlet {
       
       DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
       MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
-  	  syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+      syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
 
       
       if(!req.getParameterNames().hasMoreElements()){  // if no parameters passed in
