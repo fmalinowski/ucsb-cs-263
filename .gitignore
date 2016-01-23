@@ -1,3 +1,4 @@
 # Google App Engine generated folder
 appengine-generated/
-base/target/
+base_project/base/target/
+base_project/credentials.txt
