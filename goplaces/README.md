@@ -1,4 +1,4 @@
-appengine-skeleton
-=============================
+# Go Places [![](https://travis-ci.org/aviral26/ucsb-cs-263.svg)](https://travis-ci.org/aviral26/ucsb-cs-263)
 
-This is a generated application from the appengine-skeleton archetype.
+Go places is a web app based on Google App Engine.
+The web app can be found at this address: [http://go-places-ucsb.appspot.com](http://go-places-ucsb.appspot.com)
