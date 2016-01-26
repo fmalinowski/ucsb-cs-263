@@ -46,19 +46,22 @@ public class FakeTestResourceIT {
 		JSONObject originPlace = new JSONObject();
 		try {
 			originPlace.put("name", "start");
-			originPlace.put("latitude", 1.1);
-			originPlace.put("longitude", 2.2);
+			originPlace.put("address", "whatever");
+			originPlace.put("latitude", 0);
+			originPlace.put("longitude", 1);
 			originPlace.put("googlePlaceId", "id1");
 			JSONObject destinationPlace = new JSONObject();
-			destinationPlace.put("name", "start");
-			destinationPlace.put("latitude", 1.1);
-			destinationPlace.put("longitude", 2.2);
+			destinationPlace.put("name", "dest");
+			destinationPlace.put("address", "whatever");
+			destinationPlace.put("latitude", 2);
+			destinationPlace.put("longitude", 3);
 			destinationPlace.put("googlePlaceId", "id2");
+			expectedJSONResult.put("id", 0);
 			expectedJSONResult.put("origin", originPlace);
 			expectedJSONResult.put("destination", destinationPlace);
 			expectedJSONResult.put("mode", "DRIVING");
-			expectedJSONResult.put("duration", 0.0);
-			expectedJSONResult.put("distance", 0.0);
+			expectedJSONResult.put("duration", 0);
+			expectedJSONResult.put("distance", 0);
 			expectedJSONResult.put("waypoints", new ArrayList<Waypoint>());
 			
 			assertEquals(resultJSON.toString(), expectedJSONResult.toString());

@@ -24,7 +24,9 @@ public class FakeTestResource {
 	@Path("1")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Route getTestAction() {
-		Route route = new Route(new Place("start", 1.1, 2.2, "id1"), new Place("start", 1.1, 2.2, "id2"));
+		Place originPlace = new Place("start", "whatever", 0, 1, "id1");
+		Place destinationPlace = new Place("dest", "whatever", 2, 3, "id2");
+		Route route = new Route(originPlace, destinationPlace);
 		route.setMode(Route.TransportationMode.DRIVING);
 		return route;
 	}
