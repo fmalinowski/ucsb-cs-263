@@ -19,3 +19,4 @@ base/target/
 
 # tmp files
 *.*~
+.DS_Store
