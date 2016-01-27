@@ -3,6 +3,8 @@ package lib;
 import goplaces.models.Place;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.http.HttpResponse;
@@ -14,7 +16,7 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
 public class GoogleMap {
-	private static final String API_KEY = "REPLACE YOU KEY HERE";
+	private static final String API_KEY = "AIzaSyDJBrd2qfr_f-U91N50-0RRBQl0r2kHIUo";
 	
 	public static JSONObject getDirections(Place origin, Place destination) {
 		String url, originString, destinationString;
@@ -52,10 +54,14 @@ public class GoogleMap {
 	}
 	
 	private static String getPlaceStringForDirectionQuery(Place place) {
-		String placeString;
+		String placeString = "";
 		
 		if (place.getAddress() != null && !place.getAddress().isEmpty()) {
-			placeString = StringEscapeUtils.escapeHtml4(place.getAddress());
+			try {
+				placeString = URLEncoder.encode(place.getAddress(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 		} else {
 			placeString = String.valueOf(place.getLatitude()) + "," + String.valueOf(place.getLongitude());
 		}

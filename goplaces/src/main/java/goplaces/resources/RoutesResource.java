@@ -30,6 +30,7 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.Text;
 
 // Will map the resource to the URL todos
 @Path("/routes")
@@ -43,19 +44,20 @@ public class RoutesResource {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject createRoute(Route route,
+	public String createRoute(Route route,
 							@Context HttpServletResponse servletResponse) {
 		Place origin, destination;
 		origin = route.getOrigin();
 		destination = route.getDestination();
 		
-		if (origin == null || origin.getAddress() == null || origin.getLatitude() == 0 && origin.getLongitude() == 0) {
+		if (origin == null || origin.getAddress() == null && origin.getLatitude() == 0 && origin.getLongitude() == 0 || 
+				origin.getAddress() != null && origin.getAddress().isEmpty() && origin.getLatitude() == 0 && origin.getLongitude() == 0) {
 			throw new RuntimeException("The origin is not specified");
 		}
-		if (destination == null || destination.getAddress() == null || destination.getLatitude() == 0 && destination.getLongitude() == 0) {
+		if (destination == null || destination.getAddress() == null && destination.getLatitude() == 0 && destination.getLongitude() == 0 || 
+				destination.getAddress() != null && destination.getAddress().isEmpty() && destination.getLatitude() == 0 && destination.getLongitude() == 0) {
 			throw new RuntimeException("The destination is not specified");
 		}
-		
 		
 		JSONObject mapJSONResult = GoogleMap.getDirections(origin, destination);
 		populateRouteWithInitialRouteFromMap(mapJSONResult, route);
@@ -79,7 +81,10 @@ public class RoutesResource {
 		routeEntity.setProperty("destinationPlaceID", destinationKey.toString());
 		routeEntity.setProperty("duration", route.getDuration());
 		routeEntity.setProperty("distance", route.getDistance());
-		routeEntity.setProperty("routeJSON", mapJSONResult.toString());
+		
+		Text mapJsonAsText = new Text(mapJSONResult.toString());
+		routeEntity.setProperty("routeJSON", mapJsonAsText);
+		
 		Key routeKey = datastore.put(routeEntity);
 		
 		JSONObject answerJSON = new JSONObject();
@@ -87,7 +92,7 @@ public class RoutesResource {
 		answerJSON.put("routeID", routeKey.getId());
 		answerJSON.put("googledirections", mapJSONResult);
 		
-		return answerJSON;
+		return answerJSON.toString();
 	}
 	
 	public void populateRouteWithInitialRouteFromMap(JSONObject mapJSON, Route route) {
