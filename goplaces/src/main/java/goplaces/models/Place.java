@@ -10,14 +10,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 public class Place {
 	private String name;
 	private String address;
-	private float latitude;
-	private float longitude;
+	private double latitude;
+	private double longitude;
 	private String googlePlaceId;
 	
 	public Place() {
 	}
 
-	public Place(String name, String address, float latitude, float longitude, String googlePlaceId) {
+	public Place(String name, String address, double latitude, double longitude, String googlePlaceId) {
 		this.setName(name);
 		this.setAddress(address);
 		this.setLatitude(latitude);
@@ -44,20 +44,20 @@ public class Place {
 	}
 
 	@XmlElement
-	public float getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(float latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 
 	@XmlElement
-	public float getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(float longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 
