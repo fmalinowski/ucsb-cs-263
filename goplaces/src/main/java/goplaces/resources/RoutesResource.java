@@ -77,8 +77,8 @@ public class RoutesResource {
 		Key destinationKey = datastore.put(destinationEntity);
 		
 		Entity routeEntity = new Entity("Route");
-		routeEntity.setProperty("originPlaceID", originKey.toString());
-		routeEntity.setProperty("destinationPlaceID", destinationKey.toString());
+		routeEntity.setProperty("originPlaceID", origin.getGooglePlaceId());
+		routeEntity.setProperty("destinationPlaceID", destination.getGooglePlaceId());
 		routeEntity.setProperty("duration", route.getDuration());
 		routeEntity.setProperty("distance", route.getDistance());
 		
@@ -122,11 +122,11 @@ public class RoutesResource {
 			JSONObject originJSONObject = legObject.getJSONObject("start_location");
 			JSONObject destinationJSONObject = legObject.getJSONObject("end_location");
 			
-			origin.setLatitude(Float.parseFloat(originJSONObject.getString("lat")));
-			origin.setLongitude(Float.parseFloat(originJSONObject.getString("lng")));
+			origin.setLatitude(originJSONObject.getDouble("lat"));
+			origin.setLongitude(originJSONObject.getDouble("lng"));
 			
-			destination.setLatitude(Float.parseFloat(destinationJSONObject.getString("lat")));
-			destination.setLongitude(Float.parseFloat(destinationJSONObject.getString("lng")));
+			destination.setLatitude(destinationJSONObject.getDouble("lat"));
+			destination.setLongitude(destinationJSONObject.getDouble("lng"));
 			
 			JSONObject distanceJSON = legObject.getJSONObject("distance");
 			JSONObject durationJSON = legObject.getJSONObject("duration");
