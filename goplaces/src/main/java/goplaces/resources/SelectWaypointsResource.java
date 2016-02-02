@@ -25,35 +25,49 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import lib.GoogleMap;
+import lib.RouteBoxer;
+import goplaces.models.CustomizeRouteQuery;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 
-// Will map the resource to the URL todos
 @Path("/select_waypoints")
 public class SelectWaypointsResource {
 
 	@Context UriInfo uriInfo;
 	@Context Request request;
 	
-	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	DatastoreService datastore;
 	
+	public SelectWaypointsResource(){
+		datastore = DatastoreServiceFactory.getDatastoreService();
+	}
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public String selectWaypointsForRoute(CustomizeRouteQuery customizeRouteQuery, @Context HttpServletResponse servletResponse) {
 
-		Key routeKey = Key.createKey("Route", customizeRouteQuery.getRouteID());
-		Route originalRoute = (Route)datastore.get(routeKey);
+		try{
+			System.out.println("route ID: " + customizeRouteQuery.getRouteID());
+			Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(customizeRouteQuery.getRouteID())));
+			System.out.println("wattup doodz");
+			Text originalRouteJsonText = (Text)originalRouteEntity.getProperty("routeJSON");
+			JSONObject answerJSON = new JSONObject(originalRouteJsonText.getValue());
+			return answerJSON.toString();
+		}
+		catch(Exception e){
+			return "Oops! " + e.getMessage();
+		}
 
 		// we have a default route and a set of keywords representing the interests of the user.
 		// now box the default route --> for each keyword, search the boxes for those keywords in 
 		// a radius by querying the google places API --> for each keyword, collect and return a 
 		// list of potential places
-
 	}
 	
 

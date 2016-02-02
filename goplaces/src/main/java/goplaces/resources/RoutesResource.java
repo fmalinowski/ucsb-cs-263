@@ -39,7 +39,7 @@ public class RoutesResource {
 	@Context UriInfo uriInfo;
 	@Context Request request;
 	
-	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 	
 
 	// Route boxer expects two parameters: a list of LatLng objects which comprise the route from 
@@ -48,10 +48,10 @@ public class RoutesResource {
 
 	// Alternatively, a user can provide us with this range.
 
-	@PUT
-  	@Consumes(MediaType.APPLICATION_JSON)
-  	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-  	public String viewRoute()
+	// @PUT
+ //  	@Consumes(MediaType.APPLICATION_JSON)
+ //  	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+ //  	public String viewRoute()
   
 
 	@POST

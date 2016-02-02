@@ -12,9 +12,13 @@ public class CustomizeRouteQuery {
 	private int radius;
 	private String routeID;
 	
-	public CustomizeRouteQuery(String[] keywords, String routeID) {
+	public CustomizeRouteQuery(String routeID, String[] keywords, int radius) {
 		this.setKeywords(keywords);
 		this.setRouteID(routeID);
+		this.setRadius(radius);
+	}
+
+	public CustomizeRouteQuery() {
 	}
 
 	@XmlElement
@@ -24,7 +28,7 @@ public class CustomizeRouteQuery {
 
 	@XmlElement
 	public void setRadius(int radius) {
-		return this.radius = radius;
+		this.radius = radius;
 	}
 
 	@XmlElement
