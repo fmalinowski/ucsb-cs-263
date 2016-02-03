@@ -34,6 +34,7 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.taskqueue.*;
 
 @Path("/select_waypoints")
 public class SelectWaypointsResource {
@@ -53,15 +54,28 @@ public class SelectWaypointsResource {
 	public String selectWaypointsForRoute(CustomizeRouteQuery customizeRouteQuery, @Context HttpServletResponse servletResponse) {
 
 		try{
-			System.out.println("route ID: " + customizeRouteQuery.getRouteID());
+			//System.out.println("route ID: " + customizeRouteQuery.getRouteID());
 			Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(customizeRouteQuery.getRouteID())));
-			System.out.println("wattup doodz");
 			Text originalRouteJsonText = (Text)originalRouteEntity.getProperty("routeJSON");
-			JSONObject answerJSON = new JSONObject(originalRouteJsonText.getValue());
+			
+			Queue queue = QueueFactory.getDefaultQueue();
+        	queue.add(TaskOptions.Builder.withUrl("/boxroute").param("originalroutejsontext", originalRouteJsonText.getValue()).param("routeid", customizeRouteQuery.getRouteID()));
+			
+			JSONObject answerJSON = new JSONObject();
+			answerJSON.put("status", "OK");
+			answerJSON.put("routeID", customizeRouteQuery.getRouteID());
+			answerJSON.put("poll", true);
+			answerJSON.put("text",originalRouteJsonText.getValue());
 			return answerJSON.toString();
 		}
 		catch(Exception e){
-			return "Oops! " + e.getMessage();
+
+			JSONObject answerJSON = new JSONObject();
+			answerJSON.put("status", "ERROR");
+			answerJSON.put("message", e.getMessage());
+			answerJSON.put("poll", false);
+
+			return answerJSON.toString();
 		}
 
 		// we have a default route and a set of keywords representing the interests of the user.
