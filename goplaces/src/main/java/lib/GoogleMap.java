@@ -33,6 +33,26 @@ public class GoogleMap {
 		return sendRequest(url);
 	}
 	
+	public static String getPlacesAroundLocation(Double lat, Double lng, Double radius, String type){
+		String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+		url += "location=";
+		url += lat;
+		url += ",";
+		url += lng;
+		url += "&radius=";
+		url += radius;
+		url += "&type=";
+		String[] type_spaces = type.split(" ");
+		StringBuilder type_plus = new StringBuilder();
+		for(String t : type_spaces)
+			type_plus.append(t + "+");		
+		url += type_plus.deleteCharAt(type_plus.length() - 1);
+		url += "&key=";
+		url += API_KEY;
+
+		return sendRequest(url).toString();
+	}
+
 	private static JSONObject sendRequest(String url) {
 		String json = "";
 		

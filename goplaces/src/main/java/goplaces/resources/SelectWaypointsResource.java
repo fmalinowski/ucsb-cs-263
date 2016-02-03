@@ -25,7 +25,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import lib.GoogleMap;
-import lib.RouteBoxer;
 import goplaces.models.CustomizeRouteQuery;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -58,8 +57,14 @@ public class SelectWaypointsResource {
 			Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(customizeRouteQuery.getRouteID())));
 			Text originalRouteJsonText = (Text)originalRouteEntity.getProperty("routeJSON");
 			
+			StringBuilder keywords = new StringBuilder();
+			String[] temp = customizeRouteQuery.getKeywords();
+
+			for(String t : temp)
+				keywords.append(t + ",");
+
 			Queue queue = QueueFactory.getDefaultQueue();
-        	queue.add(TaskOptions.Builder.withUrl("/boxroute").param("originalroutejsontext", originalRouteJsonText.getValue()).param("routeid", customizeRouteQuery.getRouteID()));
+        	queue.add(TaskOptions.Builder.withUrl("/boxroute").param("originalroutejsontext", originalRouteJsonText.getValue()).param("routeid", customizeRouteQuery.getRouteID()).param("radius", new Integer(customizeRouteQuery.getRadius()).toString()).param("keywords", keywords.toString()));
 			
 			JSONObject answerJSON = new JSONObject();
 			answerJSON.put("status", "OK");

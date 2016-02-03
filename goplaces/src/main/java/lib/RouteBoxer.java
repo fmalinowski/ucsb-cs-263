@@ -12,9 +12,24 @@ import org.json.JSONException;
 
 public class RouteBoxer {
 	//protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private boolean flag = false;
+	List<LatLng> latLngRoute;
+	private List<Double> boxLats;
+	private List<Double> boxLngs;
 
 	private static final int EarthRadiusKm = 6371;
 
+	public List<Double> getLats(){
+		return boxLats;
+	}
+
+	public List<Double> getLngs(){
+		return boxLngs;
+	}	
+
+	public boolean getFlag(){
+		return flag;
+	}
 	/**
 	 * @author Cedric NICOLAS
 	 * see wedrive.mobi for the service using this lib.
@@ -238,6 +253,36 @@ public class RouteBoxer {
 	 * @constructor
 	 */
 	public RouteBoxer() {
+
+	}
+
+	public RouteBoxer(List<Double> lats, List<Double> lngs, double range){
+		if(lats.size() != lngs.size()){
+			System.out.println("ERROR Malformed lats lngs lists");
+			flag = true;
+		}
+		else{
+			latLngRoute = new ArrayList<LatLng>();
+			Iterator latsIterator = lats.iterator();
+			Iterator lngsIterator = lngs.iterator();
+			while(latsIterator.hasNext() && lngsIterator.hasNext())
+				latLngRoute.add(new LatLng((Double)latsIterator.next(), (Double)lngsIterator.next()));
+		}
+
+		List<LatLngBounds> boxes = box(latLngRoute, range);
+		//System.out.println("ROUTEBOXER boxes calculated");
+
+		boxLats = new ArrayList<Double>();
+		boxLngs = new ArrayList<Double>();
+
+		for(LatLngBounds i : boxes){
+			LatLng sw = i.getSouthWest();
+			LatLng ne = i.getNorthEast();
+			boxLats.add(sw.lat());
+			boxLats.add(ne.lat());
+			boxLngs.add(sw.lng());
+			boxLngs.add(ne.lng());
+		}
 
 	}
 

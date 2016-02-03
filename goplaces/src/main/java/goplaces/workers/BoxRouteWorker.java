@@ -48,17 +48,52 @@ public class BoxRouteWorker extends HttpServlet {
 			JSONObject routes = (JSONObject)((JSONArray)originalRouteJsonObject.get("routes")).get(0);
 			JSONArray legs = (JSONArray)routes.get("legs");
 			JSONArray steps = (JSONArray)((JSONObject)legs.get(0)).get("steps");
-			// JSONObject steps = (JSONObject)steps_holder.get(0);
+			
 			String routeID = request.getParameter("routeid");
 			System.out.println("Route steps loaded in a JSONArray...size is " + steps.size());
 
+            List<Double> stepLats = new ArrayList<Double>();
+            List<Double> stepLngs = new ArrayList<Double>();
+            
+            for(int i = 0; i < steps.size(); i++){
+                JSONObject temp = (JSONObject)((JSONObject)steps.get(i)).get("end_location");
+                //System.out.println("Lat of end_location of step " + i + " " + temp.get("lat"));
+                stepLats.add(Double.parseDouble(temp.get("lat").toString()));
+                stepLngs.add(Double.parseDouble(temp.get("lng").toString()));    
+            }   
+            System.out.println("All steps set with size " + stepLngs.size() + " and " + stepLats.size());
 
+            RouteBoxer routeBoxer = new RouteBoxer(stepLats, stepLngs, Double.parseDouble(request.getParameter("radius")));
+            
+            if(routeBoxer.getFlag())
+                throw new RuntimeException("Could not create boxes for the route");
 
+            List<Double> boxLats = routeBoxer.getLats();
+            List<Double> boxLngs = routeBoxer.getLngs();
+
+            System.out.println("Calculated boxes with number of lats " + boxLats.size() + " and number of lngs " + boxLngs.size());
+            
+            double radius = Double.parseDouble(request.getParameter("radius").toString());
+            
+            String[] types = request.getParameter("keywords").split(",");
+            System.out.println("Size of types is " + types.length);
+
+            JSONObject[][] places = new JSONObject[types.length][boxLats.size()];
+
+            for(int j = 0; j < types.length; j++){
+                for(int i = 0; i < boxLats.size(); i++){
+                    places[j][i] = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(boxLats.get(i), boxLngs.get(i), radius, types[j]));
+                }
+            }
+            System.out.println("Places found.");
         }	
+
         catch(Exception e){
         	System.out.println("ERROR " + e.getMessage());
         }
 
     }
 }
+
+
 
