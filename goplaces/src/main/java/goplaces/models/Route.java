@@ -4,6 +4,7 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import com.google.appengine.api.datastore.Text;
 
 import java.util.*;
 
@@ -24,7 +25,11 @@ public class Route {
 	private TransportationMode mode;
 	private int duration;
 	private int distance;
-	private ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>();
+
+	// should the memory creation not happen inside the set waypoints method?
+	
+	private ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>(); 
+	private Text mapJsonAsText;
 	
 	public Route() {
 	}
@@ -32,6 +37,15 @@ public class Route {
 	public Route (Place origin, Place destination) {
 		this.setOrigin(origin);
 		this.setDestination(destination);
+	}
+
+	@XmlElement
+	public Text getMapJsonAsText(){
+		return mapJsonAsText;
+	}
+
+	public void setMapJsonAsText(Text mapJsonAsText){
+		this.mapJsonAsText = new Text(mapJsonAsText.getValue());
 	}
 
 	@XmlElement

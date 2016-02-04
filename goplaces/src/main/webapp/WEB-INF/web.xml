@@ -11,7 +11,15 @@
     	</init-param>
     	<load-on-startup>1</load-on-startup>
   	</servlet>
-  
+    <servlet>
+      <servlet-name>boxroute</servlet-name>
+      <servlet-class>goplaces.workers.BoxRouteWorker</servlet-class>
+     </servlet>
+     <servlet-mapping>
+       <servlet-name>boxroute</servlet-name>
+       <url-pattern>/boxroute</url-pattern>
+     </servlet-mapping>
+
   	<servlet-mapping>
     	<servlet-name>Jersey REST Service</servlet-name>
     	<url-pattern>/rest/*</url-pattern>

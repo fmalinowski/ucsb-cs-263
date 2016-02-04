@@ -39,8 +39,21 @@ public class RoutesResource {
 	@Context UriInfo uriInfo;
 	@Context Request request;
 	
-	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 	
+
+	// Route boxer expects two parameters: a list of LatLng objects which comprise the route from 
+	// the source to the destination, and a range that the boxes should cover around the path. For 
+	// our application, a good default choice of this range can be 75 Kms.
+
+	// Alternatively, a user can provide us with this range.
+
+	// @PUT
+ //  	@Consumes(MediaType.APPLICATION_JSON)
+ //  	@Produces({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+ //  	public String viewRoute()
+  
+
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
-//Will map the resource to the URL todos
 @Path("/tests")
 public class FakeTestResource {
 
