@@ -36,6 +36,7 @@ var InitialRouteForm = React.createClass({
 			success: function(data) {
 				// Handle Data coming from server
 				// We receive data.status, data.routeId, data.googledirections
+				data.request = jsonToSend;
 				this.props.onFormSubmit(data);
 			}.bind(this),
 			error: function(xhr, status, err) {
@@ -60,10 +61,49 @@ var InitialRouteForm = React.createClass({
 
 var Map = React.createClass({
 	componentDidMount: function() {
-		var gmap = new google.maps.Map(document.getElementById('map'), {
+		this.gmap = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 34.4139629, lng: -119.8511357},
           zoom: 8
         });
+	},
+
+	componentDidUpdate: function(prevProps, prevState) {
+		if (this.props.directions) {
+			this.drawInitialDirections(this.props.directions);
+		}
+	},
+
+	drawInitialDirections: function(mapDirections) {
+		if (!mapDirections) {
+			return;
+		}
+		// WE CANNOT USE THE MAP DIRECTIONS FROM THE WEB SERVICE API BECAUSE FORMAT IS NOT THE SAME....
+		// SO WE BUILD THE ROUTE USING THE GOOGLE JAVASCRIPT API, IT'S SUPER DUMB!!!!!
+
+		// TO BE RECODED WITH PARSING INFO FROM SERVER AND USING CLASS FROM JAVASCRIPT API IF WE HAVE TIME LATER
+
+		var directionsService = new google.maps.DirectionsService();
+		var directionsDisplay = new google.maps.DirectionsRenderer();
+		directionsDisplay.setMap(this.gmap);
+
+		var originPlace = {
+			placeId: mapDirections.geocoded_waypoints[0].place_id
+		}
+		var destinationPlace = {
+			placeId: mapDirections.geocoded_waypoints[1].place_id
+		}
+
+		var request = {
+    		origin: originPlace,
+    		destination: destinationPlace,
+    		travelMode: google.maps.TravelMode.DRIVING
+  		};
+
+  		directionsService.route(request, function(result, status) {
+    		if (status == google.maps.DirectionsStatus.OK) {
+      			directionsDisplay.setDirections(result);
+    		}
+  		});
 	},
 
 	render: function() {
@@ -88,7 +128,8 @@ var App = React.createClass({
 	getInitialState: function() {
 		return {
 			routeID: null,
-			mapDirections: null
+			mapDirections: null,
+			request: null
 		}
 	},
 
@@ -96,9 +137,12 @@ var App = React.createClass({
 		// We receive initialRouteData.status, initialRouteData.routeId, initialRouteData.googledirections
 		var routeID = initialRouteData.routeID;
 		var googleMapDirections = initialRouteData.googledirections;
+		var request = initialRouteData.request;
+
 		var route = {
 			routeID: routeID,
-			mapDirections: googleMapDirections
+			mapDirections: googleMapDirections,
+			request: request
 		};
 
 		console.log("APP, handleInitialRouteSubmit, routeID: " + routeID);
@@ -111,7 +155,7 @@ var App = React.createClass({
 		return(
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} />
+				<Map directions={this.state.mapDirections} request={this.state.request} />
 				<WaypointsForm />
 
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
