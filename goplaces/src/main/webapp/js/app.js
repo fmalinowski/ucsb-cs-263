@@ -1,11 +1,56 @@
 var InitialRouteForm = React.createClass({
+	handleOriginChange: function(e) {
+		this.setState({origin: e.target.value});
+	},
+
+	handleDestinationChange: function(e) {
+		this.setState({destination: e.target.value});
+	},
+
+	handleSubmit: function(e) {
+		e.preventDefault();
+		var origin = this.state.origin;
+		var destination = this.state.destination;
+		var url = this.props.url;
+
+		if (!origin || !destination) {
+			return;
+		}
+
+		var jsonToSend = {
+			origin: {
+				address: origin
+			},
+			destination: {
+				address: destination
+			}
+		};
+		var jsonString = JSON.stringify(jsonToSend);
+
+		$.ajax({
+			url: url,
+			contentType: 'application/json',
+			dataType: 'json',
+			type: 'POST',
+			data: jsonString,
+			success: function(data) {
+				// Handle Data coming from server
+				// We receive data.status, data.routeId, data.googledirections
+				this.props.onFormSubmit(data);
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+	},
+
 	render: function() {
 		return (
 			<div className="places-form u-center u-margin-bottom-xl">
 				<h2>1. Find the initial route</h2>
-				<form>
-					<input type="text" placeholder="Origin place" className="places-form__textbox" />
-					<input type="text" placeholder="Destination place" className="places-form__textbox" />
+				<form onSubmit={this.handleSubmit}>
+					<input type="text" placeholder="Origin place" className="places-form__textbox" onChange={this.handleOriginChange} />
+					<input type="text" placeholder="Destination place" className="places-form__textbox" onChange={this.handleDestinationChange} />
 					<input type="submit" value="Find Initial Route" className="places-form__btn" />
 				</form>
 			</div>
@@ -40,11 +85,33 @@ var WaypointsForm = React.createClass({
 });
 
 var App = React.createClass({
+	getInitialState: function() {
+		return {
+			routeID: null,
+			mapDirections: null
+		}
+	},
+
+	handleInitialRouteSubmit: function(initialRouteData) {
+		// We receive initialRouteData.status, initialRouteData.routeId, initialRouteData.googledirections
+		var routeID = initialRouteData.routeID;
+		var googleMapDirections = initialRouteData.googledirections;
+		var route = {
+			routeID: routeID,
+			mapDirections: googleMapDirections
+		};
+
+		console.log("APP, handleInitialRouteSubmit, routeID: " + routeID);
+		console.log("APP, handleInitialRouteSubmit, googleMapDirections: " + googleMapDirections);
+		
+		this.setState(route);
+	},
+
 	render: function() {
 		return(
 			<div className="App">
-				<InitialRouteForm />
-				<Map />
+				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
+				<Map directions={this.state.mapDirections} />
 				<WaypointsForm />
 
 				Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
