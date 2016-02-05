@@ -74,36 +74,75 @@ var Map = React.createClass({
 	},
 
 	drawInitialDirections: function(mapDirections) {
+		// This code add more stuff to the JSON returned by our API because google map directions needs an array as the path field of a step
+		// so we construct it. Also we need to change the names of some attributes to make it compatible with Google Map Javascript API.
+
 		if (!mapDirections) {
 			return;
 		}
-		// WE CANNOT USE THE MAP DIRECTIONS FROM THE WEB SERVICE API BECAUSE FORMAT IS NOT THE SAME....
-		// SO WE BUILD THE ROUTE USING THE GOOGLE JAVASCRIPT API, IT'S SUPER DUMB!!!!!
 
-		// TO BE RECODED WITH PARSING INFO FROM SERVER AND USING CLASS FROM JAVASCRIPT API IF WE HAVE TIME LATER
-
-		var directionsService = new google.maps.DirectionsService();
-		var directionsDisplay = new google.maps.DirectionsRenderer();
-		directionsDisplay.setMap(this.gmap);
-
-		var originPlace = {
-			placeId: mapDirections.geocoded_waypoints[0].place_id
-		}
-		var destinationPlace = {
-			placeId: mapDirections.geocoded_waypoints[1].place_id
+		if (this.directionsDisplay != null) {
+			this.directionsDisplay.setMap(null);
 		}
 
-		var request = {
-    		origin: originPlace,
-    		destination: destinationPlace,
-    		travelMode: google.maps.TravelMode.DRIVING
-  		};
+		this.directionsDisplay = new google.maps.DirectionsRenderer();
 
-  		directionsService.route(request, function(result, status) {
-    		if (status == google.maps.DirectionsStatus.OK) {
-      			directionsDisplay.setDirections(result);
-    		}
-  		});
+		mapDirections.routes.map(function(route) {
+			route.bounds.south = route.bounds.southwest.lat;
+			route.bounds.west = route.bounds.southwest.lng;
+			route.bounds.north = route.bounds.northeast.lat;
+			route.bounds.east = route.bounds.northeast.lng;
+
+			delete route.bounds.southwest;
+			delete route.bounds.northeast;
+		});
+
+		mapDirections.request = {
+			origin: {
+				pladeId: mapDirections.geocoded_waypoints[0].place_id
+			},
+			destination: {
+				pladeId: mapDirections.geocoded_waypoints[1].place_id
+			},
+			travelMode: "DRIVING"
+		};
+
+		mapDirections.routes.map(function(route) {
+			route.legs.map(function(leg) {
+				leg.steps.map(function(step) {
+					var pathArray = google.maps.geometry.encoding.decodePath(step.polyline.points);
+					step.path = pathArray;
+				});
+			});
+		});
+
+		this.directionsDisplay.setDirections(mapDirections);
+		this.directionsDisplay.setMap(this.gmap);
+
+		// Make request with Javascript API (NO LONGER NEEDED AS WE FOUND A WORK AROUND AND USE JSON GIVEN BY OUR API)
+
+		// var directionsService = new google.maps.DirectionsService();
+		// var directionsDisplay = new google.maps.DirectionsRenderer();
+		// directionsDisplay.setMap(this.gmap);
+
+		// var originPlace = {
+		// 	placeId: mapDirections.geocoded_waypoints[0].place_id
+		// }
+		// var destinationPlace = {
+		// 	placeId: mapDirections.geocoded_waypoints[1].place_id
+		// }
+
+		// var request = {
+  //   		origin: originPlace,
+  //   		destination: destinationPlace,
+  //   		travelMode: google.maps.TravelMode.DRIVING
+  // 		};
+
+  // 		directionsService.route(request, function(result, status) {
+  //   		if (status == google.maps.DirectionsStatus.OK) {
+  //     			directionsDisplay.setDirections(result);
+  //   		}
+  // 		});
 	},
 
 	render: function() {
