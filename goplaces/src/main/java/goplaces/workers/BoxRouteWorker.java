@@ -86,8 +86,20 @@ public class BoxRouteWorker extends HttpServlet {
                 }
             }
             System.out.println("Places found.");
-        }	
+            DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            // add places as a property of original route entity
 
+            try{
+                Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
+                Text placesJsonAsText = new Text(places.toString());
+                originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
+                datastore.put(originalRouteEntity);
+                System.out.println("SUCCESS written places to datastore");    
+            }
+            catch(Exception e){
+                System.out.println("ERROR " + e.getMessage());    
+            }
+        }	
         catch(Exception e){
         	System.out.println("ERROR " + e.getMessage());
         }
