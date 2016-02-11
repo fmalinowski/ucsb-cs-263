@@ -197,10 +197,31 @@ var WaypointsForm = React.createClass({
 	handleSubmitCategories: function(e) {
 		e.preventDefault();
 
-		var categoriesArrayString = JSON.stringify(this.state.waypointCategories);
+		// var categoriesArrayString = JSON.stringify(this.state.waypointCategories);
+		var url = this.props.url;
+		var jsonToSend = {
+			routeID: this.props.routeID,
+			keywords: this.state.waypointCategories,
+			radius: this.props.radius
+		};
+		var jsonString = JSON.stringify(jsonToSend);
 
-		// TODO: Send here the ajax to server with the waypoitns we want to submit
-		console.log("WaypointsForm, handleSubmitCategories, " + categoriesArrayString);
+		// TODO: Send here the ajax to server with the waypoints we want to submit
+		console.log("WaypointsForm, handleSubmitCategories, submit: " + jsonString);
+		$.ajax({
+			url: url,
+			contentType: 'application/json',
+			dataType: 'json',
+			type: 'POST',
+			data: jsonString,
+			success: function(data) {
+				console.log("WaypointsForm, handleSubmitCategories, success: " + JSON.stringify(data));
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+		
 	},
 
 	render: function() {
@@ -216,8 +237,8 @@ var WaypointsForm = React.createClass({
 			<div className="waypoints-form u-center u-margin-bottom-xl">
 				<h2 className="u-center">2. Insert the waypoint categories</h2>
 				
-				Insert the categories of waypoints you want to have on your route. <br />
-				e.g.: Café, night club, museum, restaurant, zoo, etc.
+				<div className="u-margin-bottom-small">Insert the categories of waypoints you want to have on your route. <br />
+				e.g.: Café, night club, museum, restaurant, zoo, etc.</div>
 				
 				<form onSubmit={this.handleSubmitCategories}>
 					{waypointNodes}
@@ -264,13 +285,7 @@ var App = React.createClass({
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} />
-				<WaypointsForm />
-
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-				Cras ac facilisis ligula, a laoreet velit. Suspendisse aliquet ac lacus vel maximus. 
-				Aenean vitae libero finibus, porta ante pellentesque, dignissim leo. Donec facilisis sagittis arcu tristique tempus. 
-				Cras hendrerit augue euismod sem efficitur, egestas consectetur eros ultricies. 
-				Donec vitae arcu nec velit convallis vehicula. Maecenas fringilla vulputate semper.
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={10} />
 			</div>
 		);
 	}
