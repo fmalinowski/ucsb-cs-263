@@ -6,7 +6,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.NONE) // This is to include only the fields we want in the generated JSON
+@XmlAccessorType(XmlAccessType.NONE) 
+// This is to include only the fields we want in the generated JSON
 
 public class CustomRouteParameters {
 	private String routeID;
