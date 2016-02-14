@@ -215,6 +215,7 @@ var WaypointsForm = React.createClass({
 			type: 'POST',
 			data: jsonString,
 			success: function(data) {
+				setTimeout(this.pollWaypoints, 1000);
 				console.log("WaypointsForm, handleSubmitCategories, success: " + JSON.stringify(data));
 			}.bind(this),
 			error: function(xhr, status, err) {
@@ -222,6 +223,33 @@ var WaypointsForm = React.createClass({
 			}.bind(this)
 		});
 		
+	},
+
+	pollWaypoints: function() {
+		var url = this.props.url;
+		var jsonToSend = {
+			"routeID": this.props.routeID.toString(),
+		};
+
+		$.ajax({
+			url: url,
+			contentType: 'application/json',
+			type: 'GET',
+			data: jsonToSend,
+			success: function(data) {
+				if (data.status === "OK") {
+					// We got here the places to display on the map
+					console.log("WaypointsForm, pollWaypoints, got places!");					
+				} else if (data.status === "POLL") {
+					setTimeout(this.pollWaypoints, 1000);
+				}
+
+				console.log("WaypointsForm, pollWaypoints, success: " + JSON.stringify(data));
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
 	},
 
 	render: function() {
@@ -258,7 +286,8 @@ var App = React.createClass({
 		return {
 			routeID: null,
 			mapDirections: null,
-			request: null
+			request: null,
+			places: null
 		}
 	},
 
