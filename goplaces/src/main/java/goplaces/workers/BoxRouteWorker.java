@@ -3,9 +3,9 @@ package goplaces.workers;
 import goplaces.models.Place;
 import goplaces.models.Route;
 
-
 import javax.servlet.*;
 import javax.servlet.http.*;
+
 import java.io.*;
 import java.util.*;
 
@@ -36,6 +36,8 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
 
 public class BoxRouteWorker extends HttpServlet {
@@ -87,14 +89,19 @@ public class BoxRouteWorker extends HttpServlet {
             }
             System.out.println("Places found.");
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+            MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+            
             // add places as a property of original route entity
-
             try{
                 Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
                 Text placesJsonAsText = new Text(places.toString());
                 originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
-                datastore.put(originalRouteEntity);
-                System.out.println("SUCCESS written places to datastore");    
+                datastore.put(originalRouteEntity);                
+                System.out.println("SUCCESS written places to datastore");
+                
+                // We cache the route entity
+        		String cacheKey = "route-" + routeID;
+        		syncCache.put(cacheKey, originalRouteEntity);
             }
             catch(Exception e){
                 System.out.println("ERROR " + e.getMessage());    
