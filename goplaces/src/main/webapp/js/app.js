@@ -52,7 +52,7 @@ var InitialRouteForm = React.createClass({
 				<form onSubmit={this.handleSubmit}>
 					<input type="text" placeholder="Origin place" className="places-form__textbox" onChange={this.handleOriginChange} />
 					<input type="text" placeholder="Destination place" className="places-form__textbox" onChange={this.handleDestinationChange} />
-					<input type="submit" value="Find Initial Route" className="places-form__btn" />
+					<input type="submit" value="Find Initial Route" className="form-submit-btn" />
 				</form>
 			</div>
 		);
@@ -152,12 +152,130 @@ var Map = React.createClass({
 	}
 });
 
-var WaypointsForm = React.createClass({
+var WaypointEntry = React.createClass({
+	getInitialState: function() {
+		return {
+			value: this.props.value
+		}
+	},
+
+	handleValueChange: function(e) {
+		this.setState({value: e.target.value});
+		this.props.onValueChange(e.target.value, this.props.categoryIndex);
+	},
+
 	render: function() {
 		return (
-			<div className="waypoints-form u-margin-bottom-xl">
+			<input type="text" placeholder="Insert a waypoint category here" style={{width: "100%"}} value={this.state.value} onChange={this.handleValueChange} />
+		);
+	}
+});
+
+var WaypointsForm = React.createClass({
+	getInitialState: function() {
+		return {
+			waypointCategories: ['']
+		};
+	},
+
+	handleCategoryValueChange: function(newValue, index) {
+		var waypointCategories = this.state.waypointCategories;
+		waypointCategories[index] = newValue;
+
+		this.setState({waypointCategories: waypointCategories});
+	},
+
+	handleAddCategory: function(e) {
+		e.preventDefault();
+
+		var waypointCategories = this.state.waypointCategories;
+		waypointCategories.push('');
+
+		this.setState({waypointCategories: waypointCategories});	
+	},
+
+	handleSubmitCategories: function(e) {
+		e.preventDefault();
+
+		// var categoriesArrayString = JSON.stringify(this.state.waypointCategories);
+		var url = this.props.url;
+		var jsonToSend = {
+			routeID: this.props.routeID,
+			keywords: this.state.waypointCategories,
+			radius: this.props.radius
+		};
+		var jsonString = JSON.stringify(jsonToSend);
+
+		// TODO: Send here the ajax to server with the waypoints we want to submit
+		console.log("WaypointsForm, handleSubmitCategories, submit: " + jsonString);
+		$.ajax({
+			url: url,
+			contentType: 'application/json',
+			dataType: 'json',
+			type: 'POST',
+			data: jsonString,
+			success: function(data) {
+				setTimeout(this.pollWaypoints, 1000);
+				console.log("WaypointsForm, handleSubmitCategories, success: " + JSON.stringify(data));
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+		
+	},
+
+	pollWaypoints: function() {
+		var url = this.props.url;
+		var jsonToSend = {
+			"routeID": this.props.routeID.toString(),
+		};
+
+		$.ajax({
+			url: url,
+			contentType: 'application/json',
+			type: 'GET',
+			data: jsonToSend,
+			success: function(data) {
+				if (data.status === "OK") {
+					// We got here the places to display on the map
+					console.log("WaypointsForm, pollWaypoints, got places!");					
+				} else if (data.status === "POLL") {
+					setTimeout(this.pollWaypoints, 1000);
+				}
+
+				console.log("WaypointsForm, pollWaypoints, success: " + JSON.stringify(data));
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+	},
+
+	render: function() {
+		var that = this;
+
+		var waypointNodes = this.state.waypointCategories.map(function(category, index) {
+			return (
+				<WaypointEntry key={index} categoryIndex={index} value={category} onValueChange={that.handleCategoryValueChange} />
+			);
+		});
+
+		return (
+			<div className="waypoints-form u-center u-margin-bottom-xl">
 				<h2 className="u-center">2. Insert the waypoint categories</h2>
-				TODO: This has to be done after backend story is done
+				
+				<div className="u-margin-bottom-small">Insert the categories of waypoints you want to have on your route. <br />
+				e.g.: Café, night club, museum, restaurant, zoo, etc.</div>
+				
+				<form onSubmit={this.handleSubmitCategories}>
+					{waypointNodes}
+
+					<div className="waypoints-form__submit-add">
+						<a href="#" className="form-add-btn u-float-right" onClick={this.handleAddCategory}>+</a>
+						<input type="submit" value="Submit Waypoint Categories" className="form-submit-btn" />
+					</div>
+				</form>
 			</div>
 		);
 	}
@@ -168,7 +286,8 @@ var App = React.createClass({
 		return {
 			routeID: null,
 			mapDirections: null,
-			request: null
+			request: null,
+			places: null
 		}
 	},
 
@@ -195,13 +314,7 @@ var App = React.createClass({
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} />
-				<WaypointsForm />
-
-				Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-				Cras ac facilisis ligula, a laoreet velit. Suspendisse aliquet ac lacus vel maximus. 
-				Aenean vitae libero finibus, porta ante pellentesque, dignissim leo. Donec facilisis sagittis arcu tristique tempus. 
-				Cras hendrerit augue euismod sem efficitur, egestas consectetur eros ultricies. 
-				Donec vitae arcu nec velit convallis vehicula. Maecenas fringilla vulputate semper.
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} />
 			</div>
 		);
 	}

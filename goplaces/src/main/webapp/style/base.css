@@ -72,11 +72,23 @@ input[type="text"]:focus {
 	margin-bottom: 40px;
 }
 
+.u-margin-bottom-small {
+	margin-bottom: 15px;
+}
+
+.u-left-right-align:after {
+	clear: both;
+}
+
+.u-float-right {
+	float: right;
+}
+
 .places-form__textbox {
 	width: 45%;
 }
 
-.places-form__btn {
+.form-submit-btn {
 	background-color: #4099FF;
 	border: 0;
 	border-radius: 10px;
@@ -87,6 +99,26 @@ input[type="text"]:focus {
 	margin-top: 10px;
 	padding: 10px 20px;
 	text-align: center;
+}
+
+.form-add-btn {
+	background-color: #4099FF;
+	border: rgb(116, 117, 119) solid 1px;
+	border-radius: 15px;
+	box-shadow: 1px 1px 5px rgba(3, 9, 62, 0.8);
+	color: white;
+	display: inline-block;
+	font-size: 21px;
+  	height: 30px;
+  	margin-top: 15px;
+  	text-align: center;
+  	text-decoration: none;
+  	width: 30px;
+}
+
+.form-add-btn:hover {
+	background-color: yellow;
+	color: #4099FF;
 }
 
 .map-container {
