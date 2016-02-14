@@ -265,10 +265,11 @@ public class RouteBoxer {
 			latLngRoute = new ArrayList<LatLng>();
 			Iterator latsIterator = lats.iterator();
 			Iterator lngsIterator = lngs.iterator();
-			while(latsIterator.hasNext() && lngsIterator.hasNext())
+
+			while(latsIterator.hasNext() && lngsIterator.hasNext() && latLngRoute.size() < 30)
 				latLngRoute.add(new LatLng((Double)latsIterator.next(), (Double)lngsIterator.next()));
 		}
-
+		System.out.println("ROUTEBOXER size of latLngRoute restricted to 30 artificially. Size: " + latLngRoute.size());
 		List<LatLngBounds> boxes = box(latLngRoute, range);
 		//System.out.println("ROUTEBOXER boxes calculated");
 

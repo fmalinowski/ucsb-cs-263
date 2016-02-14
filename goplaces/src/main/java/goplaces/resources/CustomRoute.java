@@ -1,4 +1,4 @@
-package goplaces.resources;
+	package goplaces.resources;
 
 import goplaces.models.Place;
 import goplaces.models.Route;

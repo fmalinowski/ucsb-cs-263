@@ -65,29 +65,33 @@ public class BoxRouteWorker extends HttpServlet {
             }   
             System.out.println("All steps set with size " + stepLngs.size() + " and " + stepLats.size());
 
-            RouteBoxer routeBoxer = new RouteBoxer(stepLats, stepLngs, Double.parseDouble(request.getParameter("radius")));
+
+            System.out.println("Skipping route boxer...");
+            //RouteBoxer routeBoxer = new RouteBoxer(stepLats, stepLngs, Double.parseDouble(request.getParameter("radius")));
             
-            if(routeBoxer.getFlag())
-                throw new RuntimeException("Could not create boxes for the route");
+            //if(routeBoxer.getFlag())
+              //  throw new RuntimeException("Could not create boxes for the route");
 
-            List<Double> boxLats = routeBoxer.getLats();
-            List<Double> boxLngs = routeBoxer.getLngs();
+            //List<Double> boxLats = routeBoxer.getLats();
+            //List<Double> boxLngs = routeBoxer.getLngs();
 
-            System.out.println("Calculated boxes with number of lats " + boxLats.size() + " and number of lngs " + boxLngs.size());
+            //System.out.println("Calculated boxes with number of lats " + boxLats.size() + " and number of lngs " + boxLngs.size());
             
             double radius = Double.parseDouble(request.getParameter("radius").toString());
             
             String[] types = request.getParameter("keywords").split(",");
             System.out.println("Size of types is " + types.length);
 
-            JSONObject[][] places = new JSONObject[types.length][boxLats.size()];
-
+            //JSONObject[][] places = new JSONObject[types.length][stepLats.size()];
+            StringBuilder places = new StringBuilder();
             for(int j = 0; j < types.length; j++){
-                for(int i = 0; i < boxLats.size(); i++){
-                    places[j][i] = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(boxLats.get(i), boxLngs.get(i), radius, types[j]));
+                for(int i = 0; i < stepLats.size(); i++){
+                    //places[j][i] = ((JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]))).toJSONString();
+                
+                    places.append(((JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]))).toJSONString());
                 }
             }
-            System.out.println("Places found.");
+            System.out.println("Places found. These places are on the route at a radius of " + radius + " Kms around the whole length of the route. (Used steps of routes, not boxes around steps.)");
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
             
