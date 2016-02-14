@@ -18,7 +18,7 @@ public class GoogleMap {
 	
 	public static JSONObject getDirections(Place origin, Place destination) {
 		String url, originString, destinationString;
-		
+		// maybe url can be string builder here too?
 		originString = getPlaceStringForDirectionQuery(origin);
 		destinationString = getPlaceStringForDirectionQuery(destination);
 		url = "https://maps.googleapis.com/maps/api/directions/json?origin=";
@@ -30,25 +30,43 @@ public class GoogleMap {
 		
 		return sendRequest(url);
 	}
+
+	public static JSONObject getCustomRoute(Place origin, Place destination, Place[] waypoints){
+		StringBuilder url;
+		
+		System.out.println("GOOGLEMAP origin " + origin.getGooglePlaceId() + " destination " + destination.getGooglePlaceId() + " number of waypoints is " + waypoints.length);
+
+		url = new StringBuilder("https://maps.googleapis.com/maps/api/directions/json?origin=place_id:");
+		url.append(origin.getGooglePlaceId());
+		url.append("&destination=place_id:");
+		url.append(destination.getGooglePlaceId());
+		url.append("&waypoints=");
+		for(Place wp : waypoints)
+			url.append(wp.getName() + "|");
+		url.append("&key=");
+		url.append(API_KEY);
+
+		return sendRequest(url.toString());
+	}
 	
 	public static String getPlacesAroundLocation(Double lat, Double lng, Double radius, String type){
-		String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
-		url += "location=";
-		url += lat;
-		url += ",";
-		url += lng;
-		url += "&radius=";
-		url += radius;
-		url += "&type=";
+		StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+		url.append("location=");
+		url.append(lat);
+		url.append(",");
+		url.append(lng);
+		url.append("&radius=");
+		url.append(radius);
+		url.append("&type=");
 		String[] type_spaces = type.split(" ");
 		StringBuilder type_plus = new StringBuilder();
 		for(String t : type_spaces)
 			type_plus.append(t + "+");		
-		url += type_plus.deleteCharAt(type_plus.length() - 1);
-		url += "&key=";
-		url += API_KEY;
+		url.append(type_plus.deleteCharAt(type_plus.length() - 1));
+		url.append("&key=");
+		url.append(API_KEY);
 
-		return sendRequest(url).toString();
+		return sendRequest(url.toString()).toString();
 	}
 
 	private static JSONObject sendRequest(String urlString) {
