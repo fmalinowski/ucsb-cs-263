@@ -6,6 +6,7 @@ import goplaces.models.Route;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -30,7 +31,11 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 
 // Will map the resource to the URL todos
 @Path("/routes")
@@ -39,7 +44,15 @@ public class RoutesResource {
 	@Context UriInfo uriInfo;
 	@Context Request request;
 	
-	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	DatastoreService datastore;
+	MemcacheService syncCache;
+	
+	public RoutesResource() {
+		datastore = DatastoreServiceFactory.getDatastoreService();
+		syncCache = MemcacheServiceFactory.getMemcacheService();
+		
+		syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
+	}
 	
 
 	// Route boxer expects two parameters: a list of LatLng objects which comprise the route from 
@@ -99,6 +112,10 @@ public class RoutesResource {
 		routeEntity.setProperty("routeJSON", mapJsonAsText);
 		
 		Key routeKey = datastore.put(routeEntity);
+		
+		// We cache the route entity
+		String cacheKey = "route-" + route.getId();
+		syncCache.put(cacheKey, routeEntity);
 		
 		JSONObject answerJSON = new JSONObject();
 		answerJSON.put("status", "OK");
