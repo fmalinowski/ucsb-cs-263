@@ -5,7 +5,9 @@ import goplaces.models.Route;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
@@ -33,6 +35,9 @@ import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
 
 @Path("/select_waypoints")
@@ -42,9 +47,13 @@ public class SelectWaypointsResource {
 	@Context Request request;
 	
 	DatastoreService datastore;
+	MemcacheService syncCache;
 	
 	public SelectWaypointsResource(){
 		datastore = DatastoreServiceFactory.getDatastoreService();
+		syncCache = MemcacheServiceFactory.getMemcacheService();
+		
+		syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
 	}
 
 	@POST
@@ -70,7 +79,6 @@ public class SelectWaypointsResource {
 			answerJSON.put("status", "OK");
 			answerJSON.put("routeID", customizeRouteQuery.getRouteID());
 			answerJSON.put("poll", true);
-			answerJSON.put("text",originalRouteJsonText.getValue());
 			return answerJSON.toString();
 		}
 		catch(Exception e){
@@ -87,7 +95,50 @@ public class SelectWaypointsResource {
 		// now box the default route --> for each keyword, search the boxes for those keywords in 
 		// a radius by querying the google places API --> for each keyword, collect and return a 
 		// list of potential places
+		
+		
 	}
 	
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getPlaces (CustomizeRouteQuery customizeRouteQuery, @Context HttpServletResponse servletResponse) {
+		
+		try{
+			Entity originalRouteEntity;
+			boolean placesReadyToPoll;
+			String cacheKey = "route-" + customizeRouteQuery.getRouteID();
+			
+			if (syncCache.contains(cacheKey)) {
+				originalRouteEntity = (Entity)syncCache.get(cacheKey);
+			} else {
+				originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(customizeRouteQuery.getRouteID())));
+			}
+			
+			placesReadyToPoll = originalRouteEntity.hasProperty("placesJSON");
+			
+			JSONObject answerJSON = new JSONObject();
+			
+			if (placesReadyToPoll) {
+				Text placesJsonText = (Text)originalRouteEntity.getProperty("placesJSON");
+				
+				answerJSON.put("status", "OK");
+				answerJSON.put("routeID", customizeRouteQuery.getRouteID());
+				answerJSON.put("places", placesJsonText);
+			} else {
+				answerJSON.put("status", "POLL");
+			}
+			
+			return answerJSON.toString();
+		}
+		catch(Exception e){
 
+			JSONObject answerJSON = new JSONObject();
+			answerJSON.put("status", "ERROR");
+			answerJSON.put("message", e.getMessage());
+
+			return answerJSON.toString();
+		}		
+	}
+	
 }

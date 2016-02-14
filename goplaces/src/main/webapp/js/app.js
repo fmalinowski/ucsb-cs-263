@@ -285,7 +285,7 @@ var App = React.createClass({
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={10} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} />
 			</div>
 		);
 	}
