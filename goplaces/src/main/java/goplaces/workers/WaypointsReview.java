@@ -21,10 +21,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 
-import org.json.simple.JSONArray;
+//import org.json.simple.JSONArray;
 import org.json.JSONException;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.*;
+import org.json.JSONObject;
+//import org.json.simple.parser.*;
 
 import lib.GoogleMap;
 import lib.RouteBoxer;
@@ -45,9 +45,23 @@ public class WaypointsReview extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
             	System.out.println("WAYPOINTSREVIEW Yep we're here");
+            	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
             	String[] place_ids = request.getParameter("places").split(",");
-				System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);            	
+				System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
+
+				try{
+					for(String place : place_ids){
+						JSONObject place_details = (JSONObject)GoogleMap.getPlaceDetails(place);
+						//Entity placeEntity = new Entity("Place",place);
+						System.out.println(place_details.get("result").toString());
+						// store user reviews and ratings to datastore and memcache here
+					}
+				}
+				catch(Exception e){
+					System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
+				}
+
             }
 }
 

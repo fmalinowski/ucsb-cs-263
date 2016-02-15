@@ -31,6 +31,13 @@ public class GoogleMap {
 		return sendRequest(url);
 	}
 
+	public static JSONObject getPlaceDetails(String place_id){
+		StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/details/json?placeid=");
+		url.append(place_id + "&key=").append(API_KEY);
+
+		return sendRequest(url.toString());
+	}
+
 	public static JSONObject getCustomRoute(Place origin, Place destination, Place[] waypoints){
 		StringBuilder url;
 		
