@@ -99,11 +99,14 @@ public class BoxRouteWorker extends HttpServlet {
 
             //JSONObject[][] places = new JSONObject[types.length][stepLats.size()];
             StringBuilder places = new StringBuilder();
+            StringBuilder getReviewForPlaces = new StringBuilder();
             for(int j = 0; j < types.length; j++){
                 for(int i = 0; i < stepLats.size(); i++){
                     //places[j][i] = ((JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]))).toJSONString();
-                
-                    places.append(((JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]))).toJSONString());
+                    JSONObject place = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]));
+                    //System.out.println("Place ID " + ((JSONObject)((JSONArray)place.get("results")).get(0)).get("place_id"));
+                    getReviewForPlaces.append(((JSONObject)((JSONArray)place.get("results")).get(0)).get("place_id") + ",");
+                    places.append(place.toJSONString());
                 }
             }
             System.out.println("Places found. These places are on the route at a radius of " + radius + " Kms around the whole length of the route. (Used steps of routes, not boxes around steps.)");
@@ -118,6 +121,10 @@ public class BoxRouteWorker extends HttpServlet {
                 datastore.put(originalRouteEntity);                
                 System.out.println("SUCCESS written places to datastore");
                 
+                // add task for fetching place reviews to queue
+                QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", getReviewForPlaces.toString()));
+
+                System.out.println("Task to get reviews added to queue");
                 // We cache the route entity
         		String cacheKey = "route-" + routeID;
         		syncCache.put(cacheKey, originalRouteEntity);
