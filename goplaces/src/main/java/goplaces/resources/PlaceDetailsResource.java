@@ -46,7 +46,32 @@ public class PlaceDetailsResource {
 		
 		syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
 	}
+
+	@GET
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public String getPlaceDetails(@QueryParam("place_id") String place_id, @Context HttpServletResponse servletResponse) {
+		JSONObject answer = new JSONObject();
+		System.out.println("Place id is " + place_id);
+		try{
+			String place_details = (String)syncCache.get("place-"+place_id);
+			if(place_details != null){
+				System.out.println("Place details in memcache (and datastore) for " + place_id);
+				return answer.put("status","found in memcache").toString();
+			}
+			
+			Entity place_details_entity = datastore.get(KeyFactory.createKey("Place", place_id));
+			if(place_details_entity != null){
+				System.out.println("Place details in datastore for " + place_id);
+				return answer.put("status","found in datastore").toString();
+			}
+			return answer.put("status","not found").toString();
+		}
+		catch(Exception e){
+			System.out.println("PLACEDETAILSRESOURCE ERROR " + e.getMessage());
+			return answer.put("status","error: not found").toString();
+		}
+	}
+
 }
-	// @POST
-	// @Produces(MediaType.APPLICATION_JSON)
-	// //public String selectWaypointsForRoute(CustomizeRouteQuery customizeRouteQuery, @Context HttpServletResponse servletResponse) {
+	
