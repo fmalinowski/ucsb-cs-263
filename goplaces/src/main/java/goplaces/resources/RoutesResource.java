@@ -1,3 +1,10 @@
+/* I think we should consider checking if a route between a given source
+ * and destination already exists in our datastore before querying
+ * the Google API. It's definitely not required for correctness
+ * but should help in increasing efficiency. - AT
+*/
+
+
 package goplaces.resources;
 
 import goplaces.models.Place;

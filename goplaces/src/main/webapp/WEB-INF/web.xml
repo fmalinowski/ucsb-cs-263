@@ -15,9 +15,20 @@
       <servlet-name>boxroute</servlet-name>
       <servlet-class>goplaces.workers.BoxRouteWorker</servlet-class>
      </servlet>
+
+     <servlet>
+      <servlet-name>waypointsreview</servlet-name>
+      <servlet-class>goplaces.workers.WaypointsReview</servlet-class>
+     </servlet>
+
      <servlet-mapping>
        <servlet-name>boxroute</servlet-name>
        <url-pattern>/boxroute</url-pattern>
+     </servlet-mapping>
+
+     <servlet-mapping>
+       <servlet-name>waypointsreview</servlet-name>
+       <url-pattern>/waypointsreview</url-pattern>
      </servlet-mapping>
 
   	<servlet-mapping>
