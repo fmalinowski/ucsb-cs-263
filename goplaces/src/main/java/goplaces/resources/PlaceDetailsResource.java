@@ -1,3 +1,12 @@
+/* This URL reponds to GET requests. The parameter it expects in a GET request
+ * is the Google place_id for which ratings and reviews are required.
+ * It responds with a JSON object containing a status, which is set to "OK"
+ * when a correct response is generated, and a result, which includes the rating 
+ * and reviews for the given place, seprated by the string "/&/". (I chose this 
+ * delimiter as I suppose its not a common string) - AT
+ */
+
+
 package goplaces.resources;
 
 import java.util.logging.Level;
@@ -54,22 +63,22 @@ public class PlaceDetailsResource {
 		JSONObject answer = new JSONObject();
 		System.out.println("Place id is " + place_id);
 		try{
-			String place_details = (String)syncCache.get("place-"+place_id);
+			Entity place_details = (Entity)syncCache.get("place-"+place_id);
 			if(place_details != null){
 				System.out.println("Place details in memcache (and datastore) for " + place_id);
-				return answer.put("status","found in memcache").toString();
+				return answer.put("status","OK").put("result",(String)place_details.getProperty("rating") + "/&/" + (String)place_details.getProperty("reviews")).toString();
 			}
 			
 			Entity place_details_entity = datastore.get(KeyFactory.createKey("Place", place_id));
 			if(place_details_entity != null){
 				System.out.println("Place details in datastore for " + place_id);
-				return answer.put("status","found in datastore").toString();
+				return answer.put("status","OK").put("result",(String)place_details_entity.getProperty("rating") + "/&/" + (String)place_details_entity.getProperty("reviews")).toString();
 			}
-			return answer.put("status","not found").toString();
+			return answer.put("status","NOT FOUND").toString();
 		}
 		catch(Exception e){
 			System.out.println("PLACEDETAILSRESOURCE ERROR " + e.getMessage());
-			return answer.put("status","error: not found").toString();
+			return answer.put("status","NOT FOUND").toString();
 		}
 	}
 

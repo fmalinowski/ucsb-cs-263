@@ -115,7 +115,7 @@ public class WaypointsReview extends HttpServlet {
 							placeEntity.setProperty("rating",place_result.get("rating"));
 						}
 						catch(Exception e){
-							placeEntity.setProperty("rating","Rating not available");	
+							placeEntity.setProperty("rating","");	
 						}
 
 						/* try to set reviews, if available */
@@ -123,7 +123,7 @@ public class WaypointsReview extends HttpServlet {
 							placeEntity.setProperty("reviews",place_result.get("reviews").toString());
 						}
 						catch(Exception e){
-							placeEntity.setProperty("reviews","Reviews not available");	
+							placeEntity.setProperty("reviews","");	
 						}
 
 						try{
