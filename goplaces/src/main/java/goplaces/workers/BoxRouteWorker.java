@@ -118,7 +118,6 @@ public class BoxRouteWorker extends HttpServlet {
             
             finalPlacesJSONObject = filterPlacesRandomly(finalPlacesJSONObject, FINAL_PLACES_NUMBER_PER_REQUEST);
             
-            System.out.println("Here is the result: " + finalPlacesJSONObject.toJSONString());
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
             
