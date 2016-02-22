@@ -145,7 +145,14 @@ var Map = React.createClass({
   // 		});
 	},
 
+	displayPlacesMarkers: function(placesJSONObject) {
+		console.log("displayPlacesMarkers called");
+	},
+
 	render: function() {
+		if (this.props.places) {
+			this.displayPlacesMarkers(this.props.places);
+		}
 		return (
 			<div id="map" className="map-container u-margin-bottom-xl"></div>
 		);
@@ -239,12 +246,14 @@ var WaypointsForm = React.createClass({
 			success: function(data) {
 				if (data.status === "OK") {
 					// We got here the places to display on the map
-					console.log("WaypointsForm, pollWaypoints, got places!");					
+					console.log("WaypointsForm, pollWaypoints, got places:");
+					console.log(JSON.parse(data.places));
+					this.props.onPolledPlaces(data.places);
 				} else if (data.status === "POLL") {
 					setTimeout(this.pollWaypoints, 1000);
 				}
 
-				console.log("WaypointsForm, pollWaypoints, success: " + JSON.stringify(data));
+				console.log("WaypointsForm, pollWaypoints, success, status: " + data.status);
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
@@ -309,12 +318,21 @@ var App = React.createClass({
 		this.setState(route);
 	},
 
+	handleReturnedPlaces: function(placesJSONObject) {
+		var places = {
+			routeID: this.state.routeID,
+			mapDirections: null,
+			places: placesJSONObject
+		}
+		this.setState(places);
+	},
+
 	render: function() {
 		return(
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} request={this.state.request} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} />
+				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);
 	}
