@@ -246,6 +246,8 @@ var WaypointsForm = React.createClass({
 
 		// TODO: Send here the ajax to server with the waypoints we want to submit
 		console.log("WaypointsForm, handleSubmitCategories, submit: " + jsonString);
+		$(".loading-screen").removeClass("loading-screen--hidden");
+
 		$.ajax({
 			url: url,
 			contentType: 'application/json',
@@ -257,6 +259,7 @@ var WaypointsForm = React.createClass({
 				console.log("WaypointsForm, handleSubmitCategories, success: " + JSON.stringify(data));
 			}.bind(this),
 			error: function(xhr, status, err) {
+				$(".loading-screen").addClass("loading-screen--hidden");
 				console.error(this.props.url, status, err.toString());
 			}.bind(this)
 		});
@@ -280,6 +283,7 @@ var WaypointsForm = React.createClass({
 					console.log("WaypointsForm, pollWaypoints, got places:");
 					console.log(JSON.parse(data.places));
 					this.props.onPolledPlaces(JSON.parse(data.places));
+					$(".loading-screen").addClass("loading-screen--hidden");
 				} else if (data.status === "POLL") {
 					setTimeout(this.pollWaypoints, 1000);
 				}
