@@ -56,6 +56,9 @@ import com.google.appengine.api.taskqueue.*;
 
 
 public class BoxRouteWorker extends HttpServlet {
+	private final static int RADIUS_TO_LOOK_FOR_PLACES = 5000; // 5000 meters
+	private final static int FINAL_PLACES_NUMBER_PER_REQUEST = 100;
+	
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         try{ 
@@ -96,47 +99,80 @@ public class BoxRouteWorker extends HttpServlet {
             
             String[] types = request.getParameter("keywords").split(",");
             System.out.println("Size of types is " + types.length);
-
-            //JSONObject[][] places = new JSONObject[types.length][stepLats.size()];
-            StringBuilder places = new StringBuilder();
-            StringBuilder getReviewForPlaces = new StringBuilder();
+            
+            JSONObject finalPlacesJSONObject = new JSONObject();
+            
             for(int j = 0; j < types.length; j++){
+            	JSONArray jsonArrayForType = new JSONArray();
+            	
                 for(int i = 0; i < stepLats.size(); i++){
-                    //places[j][i] = ((JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]))).toJSONString();
-                    JSONObject place = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]));
-                    //System.out.println("Place ID " + ((JSONObject)((JSONArray)place.get("results")).get(0)).get("place_id"));
-                    getReviewForPlaces.append(((JSONObject)((JSONArray)place.get("results")).get(0)).get("place_id") + ",");
-                    places.append(place.toJSONString());
+                	JSONObject placesAroundLocationJSONObject = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), RADIUS_TO_LOOK_FOR_PLACES, types[j]));
+                	JSONArray placesAroundLocationJSONArray = (JSONArray)placesAroundLocationJSONObject.get("results");
+                	
+                	if (!placesAroundLocationJSONArray.isEmpty()) {
+                		jsonArrayForType.addAll(placesAroundLocationJSONArray);
+                    }
                 }
+                finalPlacesJSONObject.put(types[j], jsonArrayForType);
             }
-            System.out.println("Places found. These places are on the route at a radius of " + radius + " Kms around the whole length of the route. (Used steps of routes, not boxes around steps.)");
+            
+            finalPlacesJSONObject = filterPlacesRandomly(finalPlacesJSONObject, FINAL_PLACES_NUMBER_PER_REQUEST);
+            
+            System.out.println("Here is the result: " + finalPlacesJSONObject.toJSONString());
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
             
             // add places as a property of original route entity
-            try{
-                Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
-                Text placesJsonAsText = new Text(places.toString());
-                originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
-                datastore.put(originalRouteEntity);                
-                System.out.println("SUCCESS written places to datastore");
+            Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
+            Text placesJsonAsText = new Text(finalPlacesJSONObject.toJSONString());
+            originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
+            datastore.put(originalRouteEntity);                
+            System.out.println("SUCCESS written places to datastore");
                 
-                // add task for fetching place reviews to queue
-                QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", getReviewForPlaces.toString()));
+            // add task for fetching place reviews to queue
+//            QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", getReviewForPlaces.toString()));
 
-                System.out.println("Task to get reviews added to queue");
-                // We cache the route entity
-        		String cacheKey = "route-" + routeID;
-        		syncCache.put(cacheKey, originalRouteEntity);
-            }
-            catch(Exception e){
-                System.out.println("ERROR " + e.getMessage());    
-            }
+            System.out.println("Task to get reviews added to queue");
+            // We cache the route entity
+        	String cacheKey = "route-" + routeID;
+        	syncCache.put(cacheKey, originalRouteEntity);
         }	
         catch(Exception e){
         	System.out.println("ERROR " + e.getMessage());
+        	e.printStackTrace();
         }
 
+    }
+    
+    public JSONObject filterPlacesRandomly(JSONObject placesJSONObject, int finalPlacesNumberPerRequest) {
+    	JSONObject initialJSON = (JSONObject) placesJSONObject.clone();
+    	JSONObject finalJSONObject = new JSONObject();
+    	int numberFields = placesJSONObject.size();
+    	int finalPlacesNumberPerField = finalPlacesNumberPerRequest / numberFields;
+    	int remainingPlaces = finalPlacesNumberPerRequest;
+    	int keywordsProcessed = 0;
+    	
+    	Set<String> keywords = initialJSON.keySet();
+    	
+    	for (String keyword : keywords) {
+    		JSONArray placesForKeyword = (JSONArray)initialJSON.get(keyword);
+    		JSONArray finalPlacesForKeyword = new JSONArray();
+    		int placesForKeywordSize = placesForKeyword.size();
+    		
+    		int maxPlacesToKeepInFinalJSON = remainingPlaces / (numberFields - keywordsProcessed);
+    		int placesToKeepInFinalJSON = Math.min(maxPlacesToKeepInFinalJSON, placesForKeywordSize);
+    		remainingPlaces -= placesToKeepInFinalJSON;
+    		
+    		for (int i = 0; i < placesToKeepInFinalJSON; i++) {
+    			int remainingPlacesInJSONArray = placesForKeyword.size();
+    			int randomElementPosInArray = (new Random()).nextInt(remainingPlacesInJSONArray);
+    			
+    			finalPlacesForKeyword.add(placesForKeyword.remove(randomElementPosInArray));
+    		}
+    		finalJSONObject.put(keyword, finalPlacesForKeyword);
+    		keywordsProcessed++;
+    	}
+    	return finalJSONObject;
     }
 }
 

@@ -56,7 +56,7 @@ public class GoogleMap {
 		return sendRequest(url.toString());
 	}
 	
-	public static String getPlacesAroundLocation(Double lat, Double lng, Double radius, String type){
+	public static String getPlacesAroundLocation(Double lat, Double lng, int radius, String type){
 		StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
 		url.append("location=");
 		url.append(lat);
@@ -64,7 +64,7 @@ public class GoogleMap {
 		url.append(lng);
 		url.append("&radius=");
 		url.append(radius);
-		url.append("&type=");
+		url.append("&keyword=");
 		String[] type_spaces = type.split(" ");
 		StringBuilder type_plus = new StringBuilder();
 		for(String t : type_spaces)
@@ -72,6 +72,8 @@ public class GoogleMap {
 		url.append(type_plus.deleteCharAt(type_plus.length() - 1));
 		url.append("&key=");
 		url.append(API_KEY);
+		
+		System.out.println("Query sent: " + url.toString());
 
 		return sendRequest(url.toString()).toString();
 	}
