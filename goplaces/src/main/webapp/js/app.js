@@ -145,8 +145,39 @@ var Map = React.createClass({
   // 		});
 	},
 
+	drawMarkerForPlace: function(placeJSON) {
+		var marker = new google.maps.Marker({
+			position: placeJSON.geometry.location,
+			map: this.gmap,
+			title: placeJSON.name
+		});
+
+
+		var contentString = '<div id="content">' +
+		'<h1>' + placeJSON.name + '</h1>' +
+		'</div>';
+
+		var infowindow = new google.maps.InfoWindow({
+			content: contentString
+  		});
+
+  		var map = this.gmap;
+
+		marker.addListener('click', function() {
+			infowindow.open(map, marker);
+  		});
+	},
+
 	displayPlacesMarkers: function(placesJSONObject) {
 		console.log("displayPlacesMarkers called");
+
+		for (var key in placesJSONObject) {
+			var placesForKey = placesJSONObject[key];
+
+			for (var i = 0; i < placesForKey.length; i++) {
+				this.drawMarkerForPlace(placesForKey[i]);
+			}
+		}
 	},
 
 	render: function() {
@@ -248,7 +279,7 @@ var WaypointsForm = React.createClass({
 					// We got here the places to display on the map
 					console.log("WaypointsForm, pollWaypoints, got places:");
 					console.log(JSON.parse(data.places));
-					this.props.onPolledPlaces(data.places);
+					this.props.onPolledPlaces(JSON.parse(data.places));
 				} else if (data.status === "POLL") {
 					setTimeout(this.pollWaypoints, 1000);
 				}

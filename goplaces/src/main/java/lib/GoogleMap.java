@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 
 import org.json.JSONObject;
@@ -84,8 +85,11 @@ public class GoogleMap {
 		URL url;
 		try {
 			url = new URL(urlString);
+			URLConnection urlConnection = url.openConnection();
+			urlConnection.setConnectTimeout(0);
+			urlConnection.setReadTimeout(0);
 			
-			BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 		    String line;
 
 		    while ((line = reader.readLine()) != null) {
