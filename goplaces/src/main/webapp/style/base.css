@@ -125,6 +125,25 @@ input[type="text"]:focus {
 	height: 350px;
 }
 
+.map-legend {
+	list-style: none;
+}
+
+.map-legend-item {
+	color: black;
+	font-style: italic;
+	list-style: none;
+	margin-left: 0;
+}
+
+.map-legend-item__color {
+	display: inline-block;
+	height: 16px;
+	width: 16px;
+	margin-right: 5px;
+
+}
+
 .loading-screen {
 	background-color: black;
 	color: white;

@@ -145,11 +145,19 @@ var Map = React.createClass({
   // 		});
 	},
 
-	drawMarkerForPlace: function(placeJSON) {
+	drawMarkerForPlace: function(placeJSON, color) {
+		var pinColor = color.substr(1);
+
+    	var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+        new google.maps.Size(21, 34),
+        new google.maps.Point(0,0),
+        new google.maps.Point(10, 34));
+
 		var marker = new google.maps.Marker({
 			position: placeJSON.geometry.location,
 			map: this.gmap,
-			title: placeJSON.name
+			title: placeJSON.name,
+			icon: pinImage
 		});
 
 
@@ -170,23 +178,59 @@ var Map = React.createClass({
 
 	displayPlacesMarkers: function(placesJSONObject) {
 		console.log("displayPlacesMarkers called");
+		var places = placesJSONObject.places;
+		var colors = placesJSONObject.colors;
 
-		for (var key in placesJSONObject) {
-			var placesForKey = placesJSONObject[key];
+		for (var key in places) {
+			var placesForKey = places[key];
 
 			for (var i = 0; i < placesForKey.length; i++) {
-				this.drawMarkerForPlace(placesForKey[i]);
+				this.drawMarkerForPlace(placesForKey[i], colors[key]);
 			}
 		}
 	},
 
 	render: function() {
+		var cssClasses = 'map-container u-margin-bottom-xl';
+
 		if (this.props.places) {
 			this.displayPlacesMarkers(this.props.places);
+			var cssClasses = 'map-container u-margin-bottom-small';
 		}
+
 		return (
-			<div id="map" className="map-container u-margin-bottom-xl"></div>
+			<div id="map" className={cssClasses}></div>
 		);
+	}
+});
+
+var MapLegendItem = React.createClass({
+	render: function() {
+		return (
+			<li className="map-legend-item"><span className="map-legend-item__color" style={{background: this.props.color}}></span>{this.props.name}</li>
+		);
+	}
+});
+
+var MapLegend = React.createClass({
+	render: function() {
+		if (this.props.places) {
+			var mapLegendItems = [];
+			var colors = this.props.places.colors;
+
+			for (var key in colors) {
+				mapLegendItems.push(<MapLegendItem color={colors[key]} name={key} key={key} />);
+			}
+
+			return (
+				<div className="u-margin-bottom-xl">
+					<ul className="map-legend">
+						{mapLegendItems}
+					</ul>
+				</div>
+			);
+		}
+		return null;
 	}
 });
 
@@ -353,13 +397,32 @@ var App = React.createClass({
 		this.setState(route);
 	},
 
+	generateColorsForPlaces: function(placesJSONObject) {
+		var placesColors = {};
+		var numberOfPlaces = Object.keys(placesJSONObject).length;
+		var colors = randomColor({count: numberOfPlaces});
+		var currentPos = 0;
+
+		for (var key in placesJSONObject) {
+			placesColors[key] = colors[currentPos];
+			currentPos++;
+		}
+		return placesColors;
+	},
+
 	handleReturnedPlaces: function(placesJSONObject) {
-		var places = {
+		var placesColors = this.generateColorsForPlaces(placesJSONObject);
+		var placesObject = {
+			places: placesJSONObject,
+			colors: placesColors
+		}
+
+		var placesForState = {
 			routeID: this.state.routeID,
 			mapDirections: null,
-			places: placesJSONObject
+			places: placesObject
 		}
-		this.setState(places);
+		this.setState(placesForState);
 	},
 
 	render: function() {
@@ -367,6 +430,7 @@ var App = React.createClass({
 			<div className="App">
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} />
+				<MapLegend places={this.state.places} />
 				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);

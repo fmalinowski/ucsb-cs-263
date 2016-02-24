@@ -79,7 +79,6 @@ public class BoxRouteWorkerTest {
 		
 		for (String key : finalKeySet) {
 			JSONArray finalJSONArrayForKey = (JSONArray)finalJSONObject.get(key);
-			System.out.println("Key: " + key);
 			assertEquals(5, finalJSONArrayForKey.size());
 			
 			for (int i = 0; i < finalJSONArrayForKey.size(); i++) {
