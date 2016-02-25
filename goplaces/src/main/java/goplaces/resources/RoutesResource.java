@@ -1,4 +1,4 @@
-/* I think we should consider checking if a route between a given source
+/** I think we should consider checking if a route between a given source
  * and destination already exists in our datastore before querying
  * the Google API. It's definitely not required for correctness
  * but should help in increasing efficiency. - AT
