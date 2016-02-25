@@ -1,4 +1,4 @@
-	package goplaces.resources;
+package goplaces.resources;
 
 import goplaces.models.Place;
 import goplaces.models.Route;
@@ -35,7 +35,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Text;
 import com.google.appengine.api.taskqueue.*;
 
-/* This URL is used to get the customized route. The POST API requires the original routeID
+/** This URL is used to get the customized route. The POST API requires the original routeID
  * and a list of strings as parameters. More details in models/CustomRouteParameters
  */
 

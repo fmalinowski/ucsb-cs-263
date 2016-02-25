@@ -1,10 +1,3 @@
-/* This class retreives ratings and reviews for a list of places from Google
- * unless those details are already present in the datastore (or memcache)
- * One potential problem is : the list of places is not unique many times
- * This class first checks for existence of the place details locally in the datastore,
- * before making a Google API request.
- */
-
 package goplaces.workers;
 
 import goplaces.models.Place;
@@ -54,8 +47,25 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
 
+/** This class retreives ratings and reviews for a list of places from Google
+ * unless those details are already present in the datastore (or memcache)
+ * One potential problem is : the list of places is not unique many times
+ * This class first checks for existence of the place details locally in the datastore,
+ * before making a Google API request.
+ * A TODO for this class is to use a background task to fetch reviews instead of doing them in the 
+ * main application thread. The assumption here is that the number of place_ids would not be too 
+ * large.
+ *
+ * @author Aviral Takkar
+ */
 
 public class WaypointsReview extends HttpServlet {
+
+	/** This method expects an array of place_ids as parameter in the HttpServletRequest and for each place_id, it fetches the reviews and ratings
+	 * from a Google API.
+	 * It writes the fetched data to the datastore.
+	 */
+
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
             	//System.out.println("WAYPOINTSREVIEW Yep we're here");

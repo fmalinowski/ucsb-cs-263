@@ -13,10 +13,18 @@ import org.json.JSONObject;
 
 import java.util.logging.Logger;
 
+/** This class implements methods for accessing various Google Map APIs.
+ * @author Francois Malinowski
+ * @author Aviral Takkar
+ */
+
 public class GoogleMap {
 	private static final String API_KEY = "AIzaSyDJBrd2qfr_f-U91N50-0RRBQl0r2kHIUo";
 	private static final Logger log = Logger.getLogger(GoogleMap.class.getName());
 	
+	/** Method to get directions between origin and destination.
+	 * @author Francois Malinowski
+	 */
 	public static JSONObject getDirections(Place origin, Place destination) {
 		String url, originString, destinationString;
 		// maybe url can be string builder here too?
@@ -32,6 +40,10 @@ public class GoogleMap {
 		return sendRequest(url);
 	}
 
+	/** Method to get place details for a given place.
+	 * @param place_id The Google place id of before-mentioned place.
+	 * @author Aviral Takkar
+	 */
 	public static JSONObject getPlaceDetails(String place_id){
 		StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/details/json?placeid=");
 		url.append(place_id + "&key=").append(API_KEY);
@@ -39,6 +51,12 @@ public class GoogleMap {
 		return sendRequest(url.toString());
 	}
 
+	/** Method to get a custom route between origin and destination via some waypoints.
+	 * @param origin Object representing the beginning of the route
+	 * @param destination Object representing the end of the route
+	 * @param waypoints Array of objects representing the waypoints of the route
+	 * @author Aviral Takkar
+	 */
 	public static JSONObject getCustomRoute(Place origin, Place destination, Place[] waypoints){
 		StringBuilder url;
 		
@@ -57,6 +75,14 @@ public class GoogleMap {
 		return sendRequest(url.toString());
 	}
 	
+
+	/** Method to get places matching a keyword around a given location
+	 * @param lat Latitude of given location
+	 * @param lng Logitude of given location
+	 * @param radius The radius around given location in which to restrict search
+	 * @param type A keyword representing the kind of places to look for. Eg:- pet park, museum, etc.
+	 * @author Aviral Takkar
+	 */
 	public static String getPlacesAroundLocation(Double lat, Double lng, int radius, String type){
 		StringBuilder url = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
 		url.append("location=");
@@ -79,6 +105,8 @@ public class GoogleMap {
 		return sendRequest(url.toString()).toString();
 	}
 
+
+	
 	private static JSONObject sendRequest(String urlString) {
 		String json = "";
 		
