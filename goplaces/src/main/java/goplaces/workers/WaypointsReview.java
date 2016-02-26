@@ -63,13 +63,14 @@ import com.google.appengine.api.taskqueue.*;
 
 public class WaypointsReview extends HttpServlet {
 
-	/** This method expects an array of place_ids as parameter in the HttpServletRequest and for each place_id, it fetches the reviews and ratings
+	/**
+	 * This method expects an array of place_ids as parameter in the HttpServletRequest and for each place_id, it fetches the reviews and ratings
 	 * from a Google API.
 	 * It writes the fetched data to the datastore.
 	 */
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
 		//System.out.println("WAYPOINTSREVIEW Yep we're here");
 
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
@@ -83,7 +84,7 @@ public class WaypointsReview extends HttpServlet {
 		System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
 		int count = 0;
 
-		for(String place : place_ids) {
+		for (String place : place_ids) {
 			System.out.println("Place ID: " + place);
 			try {
 				if (syncCache.get("place-" + place) != null) {
@@ -110,40 +111,37 @@ public class WaypointsReview extends HttpServlet {
 				System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
 				continue;
 			}
-			Entity placeEntity = new Entity("Place",place_result.getString("place_id"));
+			Entity placeEntity = new Entity("Place", place_result.getString("place_id"));
 
 			//try to set rating, if available
-			try{
-				placeEntity.setProperty("rating",place_result.get("rating"));
-			}
-			catch(Exception e){
-				placeEntity.setProperty("rating","");
+			try {
+				placeEntity.setProperty("rating", place_result.get("rating"));
+			} catch (Exception e) {
+				placeEntity.setProperty("rating", "");
 			}
 
 			//try to set reviews, if available
-			try{
-				placeEntity.setProperty("reviews",place_result.get("reviews").toString());
-			}
-			catch(Exception e){
-				placeEntity.setProperty("reviews","");
+			try {
+				placeEntity.setProperty("reviews", place_result.get("reviews").toString());
+			} catch (Exception e) {
+				placeEntity.setProperty("reviews", "");
 			}
 
-			try{
+			try {
 				datastore.put(placeEntity);
 				System.out.println("Saved place entity with key ID " + place_result.getString("place_id"));
-			}
-			catch(Exception e){
+			} catch (Exception e) {
 				System.out.println("WAYPOINTSREVIEW ERROR unable to store " + e.getMessage());
 			}
 
 			// add place details to cache
-			try{
+			try {
 				String cacheKey = "place-" + place;
 				syncCache.put(cacheKey, placeEntity);
-			}
-			catch(Exception e){
+			} catch (Exception e) {
 				System.out.println("WAYPOINTSREVIEW ERROR unable to cache " + e.getMessage());
 			}
 		}
 		System.out.println(count + " new places added to datastore.");
 	}
+}
