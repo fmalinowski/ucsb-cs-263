@@ -47,12 +47,14 @@ import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
 
-/** This class retreives ratings and reviews for a list of places from Google
+/** This class retrieves ratings and reviews for a list of places from Google
  * unless those details are already present in the datastore (or memcache)
+ *
+ *
  * One potential problem is : the list of places is not unique many times
  * This class first checks for existence of the place details locally in the datastore,
  * before making a Google API request.
- * A TODO for this class is to use a background task to fetch reviews instead of doing them in the 
+ * TODO Use a background task to fetch reviews instead of doing them in the
  * main application thread. The assumption here is that the number of place_ids would not be too 
  * large.
  *
@@ -61,108 +63,85 @@ import com.google.appengine.api.taskqueue.*;
 
 public class WaypointsReview extends HttpServlet {
 
-	/** This method expects an array of place_ids as parameter in the HttpServletRequest and for each place_id, it fetches the reviews and ratings
+	/**
+	 * This method expects an array of place_ids as parameter in the HttpServletRequest and for each place_id, it fetches the reviews and ratings
 	 * from a Google API.
 	 * It writes the fetched data to the datastore.
 	 */
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-            	//System.out.println("WAYPOINTSREVIEW Yep we're here");
-            	
-            	DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-            	MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		//System.out.println("WAYPOINTSREVIEW Yep we're here");
 
-            	String[] place_ids = request.getParameter("places").split(",");
+		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
 
-				System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
-				int count = 0;
-				try{
+		StringBuilder place_ids_builder = new StringBuilder(request.getParameter("places")).deleteCharAt(0);
+		place_ids_builder.deleteCharAt(place_ids_builder.length() - 1);
 
-					for(String place : place_ids){
-						//System.out.println("Place: " + place);
-						try{
-							if(syncCache.get("place-"+place) != null){
-								
-								System.out.println("Place details in memcache (and datastore) for " + place);
-								continue;
-							}
-							if(datastore.get(KeyFactory.createKey("Place", place)) != null){
-								System.out.println("Place details already in datastore for " + place);
-								
-								continue;
-							}
-							throw new Exception();
-						}
-						catch(Exception e){
-							count++;
-						}
+		String[] place_ids = place_ids_builder.toString().split(",");
 
-						JSONObject place_details = (JSONObject)GoogleMap.getPlaceDetails(place);
-						
-						JSONObject place_result = (JSONObject)place_details.get("result");
+		System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
+		int count = 0;
 
-						//System.out.println();
-						//String[] temp = JSONObject.getNames(place_result);
-						
-						//Entity temp = datastore.prepare(new Query("Place").addFilter(Entity.KEY_RESERVED_PROPERTY, FilterOperator.EQUAL, KeyFactory.createKey("Place", "random")).setKeysOnly()).asIterable().iterator().next();
-						//System.out.println(temp.toString());
-					
-						// try{
-						// 	System.out.println("Place id: " + place_result.get("place_id")); 
-						// 	System.out.println(" rating " + place_result.getDouble("rating"));
-						// 	System.out.println(" reviews " + place_result.get("reviews").toString());
-						// }
-						// catch(Exception e){
-						// 	System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
-						// }
-						// store user reviews and ratings to datastore and memcache here
+		for (String place : place_ids) {
+			System.out.println("Place ID: " + place);
+			try {
+				if (syncCache.get("place-" + place) != null) {
 
-						Entity placeEntity = new Entity("Place",place_result.getString("place_id"));
-						
-						/* try to set rating, if available */
-						try{
-							placeEntity.setProperty("rating",place_result.get("rating"));
-						}
-						catch(Exception e){
-							placeEntity.setProperty("rating","");	
-						}
-
-						/* try to set reviews, if available */
-						try{
-							placeEntity.setProperty("reviews",place_result.get("reviews").toString());
-						}
-						catch(Exception e){
-							placeEntity.setProperty("reviews","");	
-						}
-
-						try{
-							datastore.put(placeEntity);
-							System.out.println("Saved place entity with key ID " + place_result.getString("place_id"));
-						}
-						catch(Exception e){
-							System.out.println("WAYPOINTSREVIEW ERROR unable to store " + e.getMessage());
-						}
-
-						// add place details to cache
-						try{
-							String cacheKey = "place-" + place;
-        					syncCache.put(cacheKey, placeEntity);
-						}
-						catch(Exception e){
-							System.out.println("WAYPOINTSREVIEW ERROR unable to cache " + e.getMessage());
-						}						
-					}
+					System.out.println("Place details in memcache (and datastore) for " + place);
+					continue;
 				}
-				catch(Exception e){
-					System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
+				if (datastore.get(KeyFactory.createKey("Place", place)) != null) {
+					System.out.println("Place details already in datastore for " + place);
+
+					continue;
 				}
-				System.out.println(count + " new places added to datastore.");
-            }
+				throw new Exception();
+			} catch (Exception e) {
+				count++;
+			}
+			JSONObject place_result;
+			try {
+				place_result = (JSONObject) ((JSONObject) GoogleMap.getPlaceDetails(place.trim())).get("result");
+				System.out.println("Place id: " + place_result.get("place_id"));
+				System.out.println(" rating " + place_result.getDouble("rating"));
+				System.out.println(" reviews " + place_result.get("reviews").toString());
+			} catch (Exception e) {
+				System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
+				continue;
+			}
+			Entity placeEntity = new Entity("Place", place_result.getString("place_id"));
+
+			//try to set rating, if available
+			try {
+				placeEntity.setProperty("rating", place_result.get("rating"));
+			} catch (Exception e) {
+				placeEntity.setProperty("rating", "");
+			}
+
+			//try to set reviews, if available
+			try {
+				placeEntity.setProperty("reviews", place_result.get("reviews").toString());
+			} catch (Exception e) {
+				placeEntity.setProperty("reviews", "");
+			}
+
+			try {
+				datastore.put(placeEntity);
+				System.out.println("Saved place entity with key ID " + place_result.getString("place_id"));
+			} catch (Exception e) {
+				System.out.println("WAYPOINTSREVIEW ERROR unable to store " + e.getMessage());
+			}
+
+			// add place details to cache
+			try {
+				String cacheKey = "place-" + place;
+				syncCache.put(cacheKey, placeEntity);
+			} catch (Exception e) {
+				System.out.println("WAYPOINTSREVIEW ERROR unable to cache " + e.getMessage());
+			}
+		}
+		System.out.println(count + " new places added to datastore.");
+	}
 }
-
-
-
-
-
-
