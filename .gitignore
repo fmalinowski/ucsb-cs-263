@@ -1,8 +1,9 @@
 *.class
-
+base_project/base/base.iml
+goplaces/goplaces.iml
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
+.idea/*
 # Package Files #
 *.jar
 *.war
