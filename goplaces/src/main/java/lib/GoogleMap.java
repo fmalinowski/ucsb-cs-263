@@ -100,7 +100,7 @@ public class GoogleMap {
 		url.append("&key=");
 		url.append(API_KEY);
 		
-		System.out.println("Query sent: " + url.toString());
+		//System.out.println("Query sent: " + url.toString());
 
 		return sendRequest(url.toString()).toString();
 	}

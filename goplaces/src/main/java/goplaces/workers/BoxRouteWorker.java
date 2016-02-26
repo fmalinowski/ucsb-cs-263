@@ -115,9 +115,9 @@ public class BoxRouteWorker extends HttpServlet {
                 }
                 finalPlacesJSONObject.put(types[j], jsonArrayForType);
             }
-            
-            finalPlacesJSONObject = filterPlacesRandomly(finalPlacesJSONObject, FINAL_PLACES_NUMBER_PER_REQUEST);
-            
+            List<String> place_ids = new ArrayList<String>();
+            finalPlacesJSONObject = filterPlacesRandomly(finalPlacesJSONObject, FINAL_PLACES_NUMBER_PER_REQUEST, place_ids);
+			//System.out.println("MAGIC " + place_ids.toString());
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
             
@@ -127,9 +127,9 @@ public class BoxRouteWorker extends HttpServlet {
             originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
             datastore.put(originalRouteEntity);                
             System.out.println("SUCCESS written places to datastore");
-                
-            // add task for fetching place reviews to queue
-//            QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", getReviewForPlaces.toString()));
+
+			// add task for fetching place reviews to queue
+            QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", place_ids.toString()));
 
             System.out.println("Task to get reviews added to queue");
             // We cache the route entity
@@ -143,11 +143,10 @@ public class BoxRouteWorker extends HttpServlet {
 
     }
     
-    public JSONObject filterPlacesRandomly(JSONObject placesJSONObject, int finalPlacesNumberPerRequest) {
+    public JSONObject filterPlacesRandomly(JSONObject placesJSONObject, int finalPlacesNumberPerRequest, List<String> place_ids) {
     	JSONObject initialJSON = (JSONObject) placesJSONObject.clone();
     	JSONObject finalJSONObject = new JSONObject();
     	int numberFields = placesJSONObject.size();
-    	int finalPlacesNumberPerField = finalPlacesNumberPerRequest / numberFields;
     	int remainingPlaces = finalPlacesNumberPerRequest;
     	int keywordsProcessed = 0;
     	
@@ -165,12 +164,15 @@ public class BoxRouteWorker extends HttpServlet {
     		for (int i = 0; i < placesToKeepInFinalJSON; i++) {
     			int remainingPlacesInJSONArray = placesForKeyword.size();
     			int randomElementPosInArray = (new Random()).nextInt(remainingPlacesInJSONArray);
-    			
-    			finalPlacesForKeyword.add(placesForKeyword.remove(randomElementPosInArray));
+				JSONObject temp = (JSONObject)placesForKeyword.remove(randomElementPosInArray);
+				place_ids.add((String)temp.get("place_id"));
+    			finalPlacesForKeyword.add(temp);
     		}
+
     		finalJSONObject.put(keyword, finalPlacesForKeyword);
     		keywordsProcessed++;
     	}
+
     	return finalJSONObject;
     }
 }
