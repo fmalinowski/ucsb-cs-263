@@ -98,7 +98,8 @@ public class BoxRouteWorker extends HttpServlet {
 
             //System.out.println("Calculated boxes with number of lats " + boxLats.size() + " and number of lngs " + boxLngs.size());
             
-            double radius = Double.parseDouble(request.getParameter("radius").toString());
+            double r = Double.parseDouble(request.getParameter("radius").toString());
+			int radius = r > RADIUS_TO_LOOK_FOR_PLACES ? RADIUS_TO_LOOK_FOR_PLACES : (int)r;
             
             String[] types = request.getParameter("keywords").split(",");
             System.out.println("Size of types is " + types.length);
@@ -109,7 +110,7 @@ public class BoxRouteWorker extends HttpServlet {
             	JSONArray jsonArrayForType = new JSONArray();
             	
                 for(int i = 0; i < stepLats.size(); i++){
-                	JSONObject placesAroundLocationJSONObject = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), RADIUS_TO_LOOK_FOR_PLACES, types[j]));
+                	JSONObject placesAroundLocationJSONObject = (JSONObject)parser.parse(GoogleMap.getPlacesAroundLocation(stepLats.get(i), stepLngs.get(i), radius, types[j]));
                 	JSONArray placesAroundLocationJSONArray = (JSONArray)placesAroundLocationJSONObject.get("results");
                 	
                 	if (!placesAroundLocationJSONArray.isEmpty()) {
