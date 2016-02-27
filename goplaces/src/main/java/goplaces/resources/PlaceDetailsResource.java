@@ -1,9 +1,11 @@
-/* This URL reponds to GET requests. The parameter it expects in a GET request
- * is the Google place_id for which ratings and reviews are required.
+/**
+ * This URL responds to GET requests. The parameter it expects in a GET request
+ * is the Google place_id as "place_id" for which ratings and reviews are required.
  * It responds with a JSON object containing a status, which is set to "OK"
  * when a correct response is generated, and a result, which includes the rating 
- * and reviews for the given place, seprated by the string "/&/". (I chose this 
- * delimiter as I suppose its not a common string) - AT
+ * and reviews for the given place, separated by the string "/&/".
+ *
+ * @author Aviral Takkar
  */
 
 
