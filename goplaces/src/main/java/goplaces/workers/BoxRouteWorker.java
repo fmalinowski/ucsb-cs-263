@@ -41,17 +41,20 @@ import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.api.taskqueue.*;
 
 
-/* This class runs in a background thread and calculates the potential waypoints along the given route.
+/**
+ * This class runs in a background thread and calculates the potential waypoints along the given route.
  * The current implementation uses the "steps" parameter in the JSONObject returned by the Google
- * Directions API. 
- * Since some routes may include a long travel distance between any two consecutive steps, some potetial 
- * waypoints may not be caputured by this algorithm.
+ * Directions API. After fetching the waypoints, a background task is started (WaypointsReview) to get
+ * reviews and ratings for these waypoints.
+ *
+ * TODO
+ * Since some routes may include a long travel distance between any two consecutive steps, some potential
+ * waypoints may not be captured by this algorithm.
  * A better way to do it would be to use RouteBoxer
  * (Once we figure out how to make it memory friendly)
  *
- * The potential waypoints are stored as a one long string in the datastore.
- * Each JSONObject corresponding to a potential waypoint is simply converted to string and
- * appended.
+ * @author Francois Malinowski
+ * @author Aviral Takkar
  */
 
 

@@ -50,11 +50,16 @@ import com.google.appengine.api.taskqueue.*;
 /** This class retrieves ratings and reviews for a list of places from Google
  * unless those details are already present in the datastore (or memcache)
  *
+ * @post Expected parameter: "places" - A list of place IDs for which reviews are to be fetched. These reviews
+ * would be fetched and stored in the datastore. The client polls /place_details (PlaceDetailsResource) to check if the reviews
+ * for a particular place are available as yet.
  *
+ *
+ * TODO
  * One potential problem is : the list of places is not unique many times
  * This class first checks for existence of the place details locally in the datastore,
  * before making a Google API request.
- * TODO Use a background task to fetch reviews instead of doing them in the
+ * Use a background task to fetch reviews instead of doing them in the
  * main application thread. The assumption here is that the number of place_ids would not be too 
  * large.
  *
