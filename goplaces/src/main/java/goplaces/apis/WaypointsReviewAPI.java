@@ -30,4 +30,9 @@ public class WaypointsReviewAPI extends HttpServlet {
             System.out.println(e.getMessage());
         }
     }
+
+    protected void doGet(HttpServletRequest req,HttpServletResponse resp)
+            throws ServletException, java.io.IOException {
+        resp.sendRedirect("/UnsupportedRequest.html");
+    }
 }
