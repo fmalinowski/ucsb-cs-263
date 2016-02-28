@@ -191,14 +191,16 @@ var Map = React.createClass({
 		var pinColor;
 		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
 
-		if (this.state.placesSelected[placeJSON.place_id]) {
+		var isPlaceSelected = this.state.placesSelected[placeJSON.place_id];
+
+		if (isPlaceSelected === true) {
 			this.state.placesSelected[placeJSON.place_id] = false;
 
     		pinColor = defaultPinColor;
-    		$selectButton.text('Unselect Waypoint');
+    		$selectButton.text('Select Waypoint');
 		} else {
 			pinColor = '000000';
-			$selectButton.text('Select Waypoint');
+			$selectButton.text('Unselect Waypoint');
 			this.state.placesSelected[placeJSON.place_id] = true;
 		}
 
