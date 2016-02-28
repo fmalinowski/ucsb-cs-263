@@ -116,19 +116,22 @@ public class WaypointsReview extends HttpServlet {
 				System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
 				continue;
 			}
-			Entity placeEntity = new Entity("Place", place_result.getString("place_id"));
+			Entity placeEntity = new Entity("Place", (String)place_result.get("place_id"));
 
 			//try to set rating, if available
 			try {
 				placeEntity.setProperty("rating", place_result.get("rating"));
+				//System.out.println("Set rating");
 			} catch (Exception e) {
 				placeEntity.setProperty("rating", "");
 			}
 
 			//try to set reviews, if available
 			try {
-				placeEntity.setProperty("reviews", place_result.get("reviews").toString());
+				placeEntity.setProperty("reviews", new Text(place_result.get("reviews").toString()));
+				//System.out.println("Set reviews");
 			} catch (Exception e) {
+				System.out.println(e.getMessage());
 				placeEntity.setProperty("reviews", "");
 			}
 

@@ -68,13 +68,15 @@ public class PlaceDetailsResource {
 			Entity place_details = (Entity)syncCache.get("place-"+place_id);
 			if(place_details != null){
 				System.out.println("Place details in memcache (and datastore) for " + place_id);
-				return answer.put("status","OK").put("result",(String)place_details.getProperty("rating") + "/&/" + (String)place_details.getProperty("reviews")).toString();
+				return answer.put("status","OK").put("result",(String)place_details.getProperty("rating") + "/&/" +
+						((Text)place_details.getProperty("reviews")).getValue()).toString();
 			}
 			
 			Entity place_details_entity = datastore.get(KeyFactory.createKey("Place", place_id));
 			if(place_details_entity != null){
 				System.out.println("Place details in datastore for " + place_id);
-				return answer.put("status","OK").put("result",(String)place_details_entity.getProperty("rating") + "/&/" + (String)place_details_entity.getProperty("reviews")).toString();
+				return answer.put("status","OK").put("result",(String)place_details_entity.getProperty("rating") +
+						"/&/" + ((Text)place_details_entity.getProperty("reviews")).getValue()).toString();
 			}
 			return answer.put("status","NOT FOUND").toString();
 		}
