@@ -120,8 +120,11 @@ public class BoxRouteWorker extends HttpServlet {
                 finalPlacesJSONObject.put(types[j], jsonArrayForType);
             }
             List<String> place_ids = new ArrayList<String>();
+            
+            finalPlacesJSONObject = removeDuplicatePlaces(finalPlacesJSONObject);
             finalPlacesJSONObject = filterPlacesRandomly(finalPlacesJSONObject, FINAL_PLACES_NUMBER_PER_REQUEST, place_ids);
-			//System.out.println("MAGIC " + place_ids.toString());
+			
+            //System.out.println("MAGIC " + place_ids.toString());
             DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
             MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
             
@@ -145,6 +148,31 @@ public class BoxRouteWorker extends HttpServlet {
         	e.printStackTrace();
         }
 
+    }
+    
+    public JSONObject removeDuplicatePlaces(JSONObject placesJSONObject) {
+    	JSONObject initialJSON = (JSONObject) placesJSONObject.clone();
+    	HashSet<String> placesPresence = new HashSet<String>();
+    	JSONObject finalJSONObject = new JSONObject();
+    	
+    	Set<String> keywords = initialJSON.keySet();
+    	
+    	for (String keyword : keywords) {
+    		JSONArray placesForKeyword = (JSONArray)initialJSON.get(keyword);
+    		JSONArray finalPlacesForKeyword = new JSONArray();
+    		
+    		for (int i = 0; i < placesForKeyword.size(); i++) {
+    			JSONObject placeJSON = (JSONObject) placesForKeyword.get(i);
+    			
+    			if (!placesPresence.contains((String)placeJSON.get("place_id"))) {
+    				placesPresence.add((String)placeJSON.get("place_id"));
+    				finalPlacesForKeyword.add(placeJSON);
+    			}
+    		}
+    		finalJSONObject.put(keyword, finalPlacesForKeyword);
+    	}
+    	
+    	return finalJSONObject;
     }
     
     public JSONObject filterPlacesRandomly(JSONObject placesJSONObject, int finalPlacesNumberPerRequest, List<String> place_ids) {

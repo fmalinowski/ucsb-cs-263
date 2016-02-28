@@ -62,7 +62,7 @@ var InitialRouteForm = React.createClass({
 var Map = React.createClass({
 	getInitialState: function() {
 		return {
-			placesSelected: []
+			placesSelected: {}
 		}
 	},
 
@@ -166,27 +166,65 @@ var Map = React.createClass({
 			icon: pinImage
 		});
 
-		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
-
-		var contentString = '<div id="content">' +
-		'<h2>' + placeJSON.name + '</h2>' +
-		'<strong>Address</strong>: ' + placeAddress +
-		'</div>';
-
-		var infowindow = new google.maps.InfoWindow({
-			content: contentString
-  		});
+		var infowindow = new google.maps.InfoWindow();
 
   		var map = this.gmap;
-  		var that = this;
+
+  		var selector = '.js-iw-' + placeJSON.place_id + ' .js-select-place';
+
+  		$(document).on('click', selector, function(e) {
+			this.handleSelectedWaypoint(placeJSON, marker, pinColor);
+		}.bind(this));
 
 		marker.addListener('click', function() {
+			infowindow.setContent(this.getContentForInfoWindow(placeJSON));
+
 			if (this.infoWindow) {
 				this.infoWindow.close();
 			}
 			this.infoWindow = infowindow;
 			infowindow.open(map, marker);
   		}.bind(this));
+	},
+
+	handleSelectedWaypoint: function(placeJSON, marker, defaultPinColor) {
+		var pinColor;
+		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
+
+		if (this.state.placesSelected[placeJSON.place_id]) {
+			this.state.placesSelected[placeJSON.place_id] = false;
+
+    		pinColor = defaultPinColor;
+    		$selectButton.text('Unselect Waypoint');
+		} else {
+			pinColor = '000000';
+			$selectButton.text('Select Waypoint');
+			this.state.placesSelected[placeJSON.place_id] = true;
+		}
+
+		var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+        	new google.maps.Size(21, 34),
+        	new google.maps.Point(0,0),
+        	new google.maps.Point(10, 34));
+
+		marker.setIcon(pinImage);
+	},
+
+	getContentForInfoWindow: function(placeJSON) {
+		var textForWaypoint = this.state.placesSelected[placeJSON.place_id] ? "Unselect Waypoint" : "Select Waypoint";
+		var buttonCode = '<button class="js-select-place" data-placeId="' + placeJSON.place_id + '">' + textForWaypoint + '</button>';
+
+		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
+
+		var contentString = '<div id="content" class="js-iw-' + placeJSON.place_id + '">' +
+		'<h2>' + placeJSON.name + '</h2>' +
+		'<strong>Address</strong>: ' + placeAddress +
+		'<br>' + buttonCode +
+		'</div>';
+
+		$('.js-select-place')
+
+		return contentString;
 	},
 
 	displayPlacesMarkers: function(placesJSONObject) {
