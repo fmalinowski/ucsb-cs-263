@@ -60,6 +60,12 @@ var InitialRouteForm = React.createClass({
 });
 
 var Map = React.createClass({
+	getInitialState: function() {
+		return {
+			placesSelected: []
+		}
+	},
+
 	componentDidMount: function() {
 		this.gmap = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 34.4139629, lng: -119.8511357},
@@ -160,9 +166,11 @@ var Map = React.createClass({
 			icon: pinImage
 		});
 
+		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
 
 		var contentString = '<div id="content">' +
-		'<h1>' + placeJSON.name + '</h1>' +
+		'<h2>' + placeJSON.name + '</h2>' +
+		'<strong>Address</strong>: ' + placeAddress +
 		'</div>';
 
 		var infowindow = new google.maps.InfoWindow({
@@ -170,10 +178,15 @@ var Map = React.createClass({
   		});
 
   		var map = this.gmap;
+  		var that = this;
 
 		marker.addListener('click', function() {
+			if (this.infoWindow) {
+				this.infoWindow.close();
+			}
+			this.infoWindow = infowindow;
 			infowindow.open(map, marker);
-  		});
+  		}.bind(this));
 	},
 
 	displayPlacesMarkers: function(placesJSONObject) {
@@ -431,7 +444,7 @@ var App = React.createClass({
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} />
 				<MapLegend places={this.state.places} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={30} onPolledPlaces={this.handleReturnedPlaces} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={5000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);
 	}
