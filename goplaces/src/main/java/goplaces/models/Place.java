@@ -13,9 +13,8 @@ public class Place {
 	private double latitude;
 	private double longitude;
 	private String googlePlaceId;
-	
-	public Place() {
-	}
+	private String rating;
+	private String reviews;
 
 	public Place(String name, String address, double latitude, double longitude, String googlePlaceId) {
 		this.setName(name);
@@ -23,6 +22,38 @@ public class Place {
 		this.setLatitude(latitude);
 		this.setLongitude(longitude);
 		this.setGooglePlaceId(googlePlaceId);
+	}
+
+	public Place(String name, String address, double latitude, double longitude, String googlePlaceId, String
+			reviews, String rating) {
+		this.setName(name);
+		this.setAddress(address);
+		this.setLatitude(latitude);
+		this.setLongitude(longitude);
+		this.setGooglePlaceId(googlePlaceId);
+		this.setReviews(reviews);
+		this.setRating(rating);
+	}
+
+	@XmlElement
+	public String getReviews() {
+		return reviews;
+	}
+
+	public void setReviews(String reviews) {
+		this.reviews = reviews;
+	}
+
+	@XmlElement
+	public String getRating() {
+		return rating;
+	}
+
+	public void setRating(String rating) {
+		this.rating = rating;
+	}
+	
+	public Place() {
 	}
 
 	@XmlElement
