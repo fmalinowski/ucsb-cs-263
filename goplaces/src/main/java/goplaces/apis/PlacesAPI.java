@@ -27,32 +27,24 @@ public class PlacesAPI {
     DatastoreService datastore;
     MemcacheService syncCache;
 
-    @GET
-    @Produces(MediaType.TEXT_XML)
-    public String getTodosBrowser() {
-        return "Hi";
-    }
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String addPlace(Place place,
                         @Context HttpServletResponse servletResponse) throws IOException {
         try{
-            StringBuilder msg = new StringBuilder();
-            int flag = 0;
-            Entity originEntity = new Entity("Place", place.getGooglePlaceId());
-            originEntity.setProperty("name", place.getName());
-            originEntity.setProperty("address", place.getAddress());
-            originEntity.setProperty("latitude", place.getLatitude());
-            originEntity.setProperty("longitude", place.getLongitude());
-            originEntity.setProperty("rating", place.getRating());
-            originEntity.setProperty("reviews", new Text(place.getReviews()));
+
+            Entity entity = new Entity("Place", place.getGooglePlaceId());
+            entity.setProperty("name", place.getName());
+            entity.setProperty("address", place.getAddress());
+            entity.setProperty("latitude", place.getLatitude());
+            entity.setProperty("longitude", place.getLongitude());
+            entity.setProperty("rating", place.getRating());
+            entity.setProperty("reviews", new Text(place.getReviews()));
 
             datastore = DatastoreServiceFactory.getDatastoreService();
-            Key key = datastore.put(originEntity);
-            return new JSONObject().append("status","OK").append("key", key.toString()).append("message",msg
-                        .toString()).toString();
+            Key key = datastore.put(entity);
+            return new JSONObject().append("status","OK").append("key", key.toString()).toString();
         }
         catch(Exception e){
             return new JSONObject().append("status","ERROR").append("message", "Google Place ID is required.")
