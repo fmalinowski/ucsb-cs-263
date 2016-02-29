@@ -60,17 +60,12 @@ var InitialRouteForm = React.createClass({
 });
 
 var Map = React.createClass({
-	getInitialState: function() {
-		return {
-			placesSelected: []
-		}
-	},
-
 	componentDidMount: function() {
 		this.gmap = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 34.4139629, lng: -119.8511357},
           zoom: 8
         });
+        this.placesSelected = {};
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -166,27 +161,69 @@ var Map = React.createClass({
 			icon: pinImage
 		});
 
-		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
-
-		var contentString = '<div id="content">' +
-		'<h2>' + placeJSON.name + '</h2>' +
-		'<strong>Address</strong>: ' + placeAddress +
-		'</div>';
-
-		var infowindow = new google.maps.InfoWindow({
-			content: contentString
-  		});
+		var infowindow = new google.maps.InfoWindow();
 
   		var map = this.gmap;
-  		var that = this;
+
+  		var selector = '.js-iw-' + placeJSON.place_id + ' .js-select-place';
+
+  		$(document).on('click', selector, function(e) {
+			this.handleSelectedWaypoint(placeJSON, marker, pinColor);
+		}.bind(this));
 
 		marker.addListener('click', function() {
+			infowindow.setContent(this.getContentForInfoWindow(placeJSON));
+
 			if (this.infoWindow) {
 				this.infoWindow.close();
 			}
 			this.infoWindow = infowindow;
 			infowindow.open(map, marker);
   		}.bind(this));
+	},
+
+	handleSelectedWaypoint: function(placeJSON, marker, defaultPinColor) {
+		var pinColor;
+		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
+
+		var isPlaceSelected = this.placesSelected[placeJSON.place_id];
+
+		if (isPlaceSelected === true) {
+			this.placesSelected[placeJSON.place_id] = false;
+
+    		pinColor = defaultPinColor;
+    		$selectButton.text('Select Waypoint');
+		} else {
+			pinColor = '000000';
+			$selectButton.text('Unselect Waypoint');
+			this.placesSelected[placeJSON.place_id] = true;
+		}
+
+		var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
+        	new google.maps.Size(21, 34),
+        	new google.maps.Point(0,0),
+        	new google.maps.Point(10, 34));
+
+		marker.setIcon(pinImage);
+
+		this.props.handleSelectedWaypoints(this.placesSelected);
+	},
+
+	getContentForInfoWindow: function(placeJSON) {
+		var textForWaypoint = this.placesSelected[placeJSON.place_id] ? "Unselect Waypoint" : "Select Waypoint";
+		var buttonCode = '<button class="js-select-place" data-placeId="' + placeJSON.place_id + '">' + textForWaypoint + '</button>';
+
+		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
+
+		var contentString = '<div id="content" class="js-iw-' + placeJSON.place_id + '">' +
+		'<h2>' + placeJSON.name + '</h2>' +
+		'<strong>Address</strong>: ' + placeAddress +
+		'<br>' + buttonCode +
+		'</div>';
+
+		$('.js-select-place')
+
+		return contentString;
 	},
 
 	displayPlacesMarkers: function(placesJSONObject) {
@@ -382,13 +419,51 @@ var WaypointsForm = React.createClass({
 	}
 });
 
+var FinalRouteController = React.createClass({
+	handleWaypointsSubmit: function() {
+		var jsonToSend = {
+			waypoints: this.props.selectedPlaces,
+			routeID: this.props.routeID
+		};
+
+		var jsonString = JSON.stringify(jsonToSend);
+
+		$.ajax({
+			url: this.props.url,
+			contentType: 'application/json',
+			dataType: 'json',
+			type: 'POST',
+			data: jsonString,
+			success: function(data) {
+				debugger;
+				console.log("handleWaypointsSubmit, success: " + data);
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+	},
+
+	render: function() {
+		if (this.props.selectedPlaces) {
+			return (
+				<div className="final-route-bar">
+					<a href="#" className="form-submit-btn form-submit-btn--red" onClick={this.handleWaypointsSubmit}>Finalize Route</a>
+				</div>
+			)
+		}
+		return null;
+	}
+});
+
 var App = React.createClass({
 	getInitialState: function() {
 		return {
 			routeID: null,
 			mapDirections: null,
 			request: null,
-			places: null
+			places: null,
+			selectedPlaces: null
 		}
 	},
 
@@ -431,18 +506,34 @@ var App = React.createClass({
 		}
 
 		var placesForState = {
-			routeID: this.state.routeID,
 			mapDirections: null,
 			places: placesObject
 		}
 		this.setState(placesForState);
 	},
 
+	handleSelectedWaypoints: function(selectedPlacesJSON) {
+		console.log("handleSelectedWaypoints called");
+
+		var selectedPlacesArray = [];
+		for (var place in selectedPlacesJSON) {
+			if (selectedPlacesJSON[place]) {
+				selectedPlacesArray.push(place);
+			}
+		}
+
+		this.setState({
+			selectedPlaces: selectedPlacesArray,
+			places: null
+		});
+	},
+
 	render: function() {
 		return(
 			<div className="App">
+				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} />
+				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints}/>
 				<MapLegend places={this.state.places} />
 				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={5000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
