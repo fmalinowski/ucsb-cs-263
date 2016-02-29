@@ -66,11 +66,13 @@ public class GoogleMap {
 		url.append(origin.getGooglePlaceId());
 		url.append("&destination=place_id:");
 		url.append(destination.getGooglePlaceId());
-		url.append("&waypoints=");
+		url.append("&waypoints=optimize:true%7C");
 		for(Place wp : waypoints)
-			url.append(wp.getName() + "|");
+			url.append("place_id:" + wp.getGooglePlaceId() + "%7C");
 		url.append("&key=");
 		url.append(API_KEY);
+		
+		System.out.println("getCustomRoute query sent: " + url.toString());
 
 		return sendRequest(url.toString());
 	}
