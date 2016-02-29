@@ -16,6 +16,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -64,10 +65,9 @@ public class CustomRoute {
 	@GET
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public String getFinalRoute(CustomRouteParameters customRouteParameters, @Context HttpServletResponse servletResponse) {
+	public String getFinalRoute(@QueryParam("routeID") String routeID, @Context HttpServletResponse servletResponse) {
 		
 		try {
-			String routeID = customRouteParameters.getRouteID();
 			String cacheKey = "finalroute-" + routeID;
 		
 			Entity routeEntity = null;
@@ -88,6 +88,7 @@ public class CustomRoute {
 			answerJSON.put("message", "Final Route not yet computed!");
 			return answerJSON.toString();
 		} catch (Exception e) {
+			e.printStackTrace();
 			
 			JSONObject answerJSON = new JSONObject();
 			answerJSON.put("status", "ERROR");
