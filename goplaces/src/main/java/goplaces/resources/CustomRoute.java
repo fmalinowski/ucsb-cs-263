@@ -61,15 +61,14 @@ public class CustomRoute {
 			System.out.println("route ID: " + customRouteParameters.getRouteID());
 			Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(customRouteParameters.getRouteID())));
 			
-			Place origin = new Place("","",0.0,0.0,(String)originalRouteEntity.getProperty("originPlaceId"));
-			Place destination = new Place("","",0.0,0.0,(String)originalRouteEntity.getProperty("destinationPlaceId"));
-
+			Place origin = new Place("","",0.0,0.0,(String)originalRouteEntity.getProperty("originPlaceID"));
+			Place destination = new Place("","",0.0,0.0,(String)originalRouteEntity.getProperty("destinationPlaceID"));
 			
-			String[] wp = customRouteParameters.getWaypoints();
-			Place[] waypoints = new Place[wp.length];
+			ArrayList<String> wp = customRouteParameters.getWaypoints();
+			Place[] waypoints = new Place[wp.size()];
 
-			for(int i = 0; i < wp.length; i++)
-				waypoints[i] = new Place(wp[i],"",0.0,0.0,""); // may need to change this - we eventually want to search by google place id, and not name
+			for(int i = 0; i < wp.size(); i++)
+				waypoints[i] = new Place("","",0.0,0.0,wp.get(i)); // may need to change this - we eventually want to search by google place id, and not name
 			System.out.println("CUSTOMROUTE calling Google API...");
 			return GoogleMap.getCustomRoute(origin, destination, waypoints).toString();
 		}

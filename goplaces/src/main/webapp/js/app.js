@@ -60,17 +60,12 @@ var InitialRouteForm = React.createClass({
 });
 
 var Map = React.createClass({
-	getInitialState: function() {
-		return {
-			placesSelected: {}
-		}
-	},
-
 	componentDidMount: function() {
 		this.gmap = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 34.4139629, lng: -119.8511357},
           zoom: 8
         });
+        this.placesSelected = {};
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
@@ -191,17 +186,17 @@ var Map = React.createClass({
 		var pinColor;
 		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
 
-		var isPlaceSelected = this.state.placesSelected[placeJSON.place_id];
+		var isPlaceSelected = this.placesSelected[placeJSON.place_id];
 
 		if (isPlaceSelected === true) {
-			this.state.placesSelected[placeJSON.place_id] = false;
+			this.placesSelected[placeJSON.place_id] = false;
 
     		pinColor = defaultPinColor;
     		$selectButton.text('Select Waypoint');
 		} else {
 			pinColor = '000000';
 			$selectButton.text('Unselect Waypoint');
-			this.state.placesSelected[placeJSON.place_id] = true;
+			this.placesSelected[placeJSON.place_id] = true;
 		}
 
 		var pinImage = new google.maps.MarkerImage("http://chart.apis.google.com/chart?chst=d_map_pin_letter&chld=%E2%80%A2|" + pinColor,
@@ -210,10 +205,12 @@ var Map = React.createClass({
         	new google.maps.Point(10, 34));
 
 		marker.setIcon(pinImage);
+
+		this.props.handleSelectedWaypoints(this.placesSelected);
 	},
 
 	getContentForInfoWindow: function(placeJSON) {
-		var textForWaypoint = this.state.placesSelected[placeJSON.place_id] ? "Unselect Waypoint" : "Select Waypoint";
+		var textForWaypoint = this.placesSelected[placeJSON.place_id] ? "Unselect Waypoint" : "Select Waypoint";
 		var buttonCode = '<button class="js-select-place" data-placeId="' + placeJSON.place_id + '">' + textForWaypoint + '</button>';
 
 		var placeAddress = placeJSON.vicinity != null ? placeJSON.vicinity : 'n/a';
@@ -422,13 +419,51 @@ var WaypointsForm = React.createClass({
 	}
 });
 
+var FinalRouteController = React.createClass({
+	handleWaypointsSubmit: function() {
+		var jsonToSend = {
+			waypoints: this.props.selectedPlaces,
+			routeID: this.props.routeID
+		};
+
+		var jsonString = JSON.stringify(jsonToSend);
+
+		$.ajax({
+			url: this.props.url,
+			contentType: 'application/json',
+			dataType: 'json',
+			type: 'POST',
+			data: jsonString,
+			success: function(data) {
+				debugger;
+				console.log("handleWaypointsSubmit, success: " + data);
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(this.props.url, status, err.toString());
+			}.bind(this)
+		});
+	},
+
+	render: function() {
+		if (this.props.selectedPlaces) {
+			return (
+				<div className="final-route-bar">
+					<a href="#" className="form-submit-btn form-submit-btn--red" onClick={this.handleWaypointsSubmit}>Finalize Route</a>
+				</div>
+			)
+		}
+		return null;
+	}
+});
+
 var App = React.createClass({
 	getInitialState: function() {
 		return {
 			routeID: null,
 			mapDirections: null,
 			request: null,
-			places: null
+			places: null,
+			selectedPlaces: null
 		}
 	},
 
@@ -471,18 +506,34 @@ var App = React.createClass({
 		}
 
 		var placesForState = {
-			routeID: this.state.routeID,
 			mapDirections: null,
 			places: placesObject
 		}
 		this.setState(placesForState);
 	},
 
+	handleSelectedWaypoints: function(selectedPlacesJSON) {
+		console.log("handleSelectedWaypoints called");
+
+		var selectedPlacesArray = [];
+		for (var place in selectedPlacesJSON) {
+			if (selectedPlacesJSON[place]) {
+				selectedPlacesArray.push(place);
+			}
+		}
+
+		this.setState({
+			selectedPlaces: selectedPlacesArray,
+			places: null
+		});
+	},
+
 	render: function() {
 		return(
 			<div className="App">
+				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} />
+				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints}/>
 				<MapLegend places={this.state.places} />
 				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={5000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>

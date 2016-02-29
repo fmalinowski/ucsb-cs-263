@@ -1,5 +1,7 @@
 package goplaces.models;
 
+import java.util.ArrayList;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -11,9 +13,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 public class CustomRouteParameters {
 	private String routeID;
-	private String[] waypoints;
+	private ArrayList<String> waypoints;
 	
-	public CustomRouteParameters(String ID, String[] waypoints) {
+	public CustomRouteParameters(String ID, ArrayList<String> waypoints) {
 		this.setWaypoints(waypoints);
 		this.setRouteID(ID);
 	}
@@ -22,14 +24,12 @@ public class CustomRouteParameters {
 	}
 
 	@XmlElement
-	public String[] getWaypoints() {
+	public ArrayList<String> getWaypoints() {
 		return waypoints;
 	}
 
-	@XmlElement
-	public void setWaypoints(String[] waypoints) {
-		for(int i = 0; i < waypoints.length; i++)
-			this.waypoints[i] = waypoints[i];
+	public void setWaypoints(ArrayList<String> waypoints) {
+		this.waypoints = waypoints;
 	}
 
 	@XmlElement
