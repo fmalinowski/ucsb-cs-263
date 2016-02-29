@@ -264,9 +264,9 @@ var MapLegendItem = React.createClass({
 
 var MapLegend = React.createClass({
 	render: function() {
-		if (this.props.places) {
+		if (this.props.colorLegend) {
 			var mapLegendItems = [];
-			var colors = this.props.places.colors;
+			var colors = this.props.colorLegend;
 
 			for (var key in colors) {
 				mapLegendItems.push(<MapLegendItem color={colors[key]} name={key} key={key} />);
@@ -435,7 +435,6 @@ var FinalRouteController = React.createClass({
 			type: 'POST',
 			data: jsonString,
 			success: function(data) {
-				debugger;
 				console.log("handleWaypointsSubmit, success: " + data);
 			}.bind(this),
 			error: function(xhr, status, err) {
@@ -463,7 +462,8 @@ var App = React.createClass({
 			mapDirections: null,
 			request: null,
 			places: null,
-			selectedPlaces: null
+			selectedPlaces: null,
+			colorLegend: null
 		}
 	},
 
@@ -507,7 +507,8 @@ var App = React.createClass({
 
 		var placesForState = {
 			mapDirections: null,
-			places: placesObject
+			places: placesObject,
+			colorLegend: placesColors
 		}
 		this.setState(placesForState);
 	},
@@ -534,7 +535,7 @@ var App = React.createClass({
 				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
 				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints}/>
-				<MapLegend places={this.state.places} />
+				<MapLegend colorLegend={this.state.colorLegend} />
 				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={5000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);
