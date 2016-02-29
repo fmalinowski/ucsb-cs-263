@@ -15,7 +15,11 @@ import org.json.JSONObject;
  *
  * @author Aviral Takkar
  *
- * TODO Document curl commands
+ * Curl examples:
+ *
+ * GET - curl "http://go-places-ucsb.appspot.com/rest/places/{place_id}"
+ * POST - curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data "{\"name\":\"UCSB\",\"address\":\"At the Pacific shore,California\",\"latitude\":5.6,\"longitude\":6.6,\"rating\":5.0,\"reviews\":\"its magnificient\",\"googlePlaceId\":\"unknown\"}" http://go-places-ucsb.appspot.com/rest/places
+ *
  */
 
 @Path("/places")

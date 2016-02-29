@@ -17,6 +17,11 @@ import org.json.JSONObject;
  * @author Aviral Takkar
  *
  * TODO Document curl commands
+ * Curl examples:
+ *
+ * GET - curl "http://go-places-ucsb.appspot.com/rest/routesapi/{route_id}"
+ * POST - curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data "{\"origin\":{\"address\":\"santa barbara\"},\"destination\":{\"address\":\"los angeles\"},\"mapJsonAsText\":\"xyz\"}" http://go-places-ucsb.appspot.com/rest/routesapi
+ *
  */
 
 @Path("/routesapi")
