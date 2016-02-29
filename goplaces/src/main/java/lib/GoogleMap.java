@@ -66,7 +66,7 @@ public class GoogleMap {
 		url.append(origin.getGooglePlaceId());
 		url.append("&destination=place_id:");
 		url.append(destination.getGooglePlaceId());
-		url.append("&waypoints=optimize:true%7C");
+		url.append("&waypoints=");
 		for(Place wp : waypoints)
 			url.append("place_id:" + wp.getGooglePlaceId() + "%7C");
 		url.append("&key=");
