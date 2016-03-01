@@ -1,17 +1,75 @@
+var StepInstruction = React.createClass({
+	render: function() {
+		var step = this.props.json;
+
+		var htmlInstructions = {
+			__html: step.html_instructions
+		};
+
+		return (
+			<div className="step-instruction u-margin-bottom-xsmall">
+				<span className="step-instruction__info u-margin-right-xl"><span className="icon-clock2 u-margin-right-small"></span>{step.duration.text}</span>
+				<span className="step-instruction__info u-margin-right-xl"><span className="icon-make-group u-margin-right-small"></span>{step.distance.text}</span>
+				<div dangerouslySetInnerHTML={htmlInstructions} />
+			</div>
+		);
+	}
+});
+
+var LegInstructions = React.createClass({
+	render: function() {
+		var startAddress = this.props.json.start_address;
+		var endAddress = this.props.json.end_address;
+		var stepsArray = this.props.json.steps;
+
+		var stepsInstructions = stepsArray.map(function(step, index) {
+			return (
+				<StepInstruction json={step} key={index} />
+			);
+		});
+
+		return (
+			<div className="leg-instructions">
+				<h2 className="u-center">Leg {this.props.legNumber}</h2>
+				<div className="u-margin-bottom-small">
+					<span style={{color: 'blue'}}>From: <em>{startAddress}</em></span> <br />
+					<span style={{color: 'red'}}>To: <em>{endAddress}</em></span>
+				</div>
+				{stepsInstructions}
+			</div>
+		);
+	}
+});
+
 var DrivingInstructions = React.createClass({
 	render: function() {
 		if (this.props.directions) {
+			if (!this.props.directions.routes || this.props.directions.routes.length == 0) {
+				return null;
+			}
+
+			var legsJSONArray = this.props.directions.routes[0].legs;
+
+			var legsInstructions = legsJSONArray.map(function(leg, index) {
+				return (
+					<LegInstructions json={leg} key={index} legNumber={index+1} />
+				);
+			});
+
+
 			return (
 				<div>
-					<h1>Final route #{this.props.routeID}</h1>
+					<h1 className="u-center">Final route #{this.props.routeID}</h1>
+					<div className="u-center u-margin-bottom-small">Want to share this route this a friend? Here is the url: {window.location.href}</div>
+					{legsInstructions}
 				</div>
-			)
+			);
 		}
 		return (
 			<div>
 				<h1>No route available for {this.props.routeID}</h1>
 			</div>
-		)
+		);
 	}
 });
 
@@ -80,31 +138,6 @@ var Map = React.createClass({
 
 		this.directionsDisplay.setDirections(mapDirections);
 		this.directionsDisplay.setMap(this.gmap);
-
-		// Make request with Javascript API (NO LONGER NEEDED AS WE FOUND A WORK AROUND AND USE JSON GIVEN BY OUR API)
-
-		// var directionsService = new google.maps.DirectionsService();
-		// var directionsDisplay = new google.maps.DirectionsRenderer();
-		// directionsDisplay.setMap(this.gmap);
-
-		// var originPlace = {
-		// 	placeId: mapDirections.geocoded_waypoints[0].place_id
-		// }
-		// var destinationPlace = {
-		// 	placeId: mapDirections.geocoded_waypoints[1].place_id
-		// }
-
-		// var request = {
-  //   		origin: originPlace,
-  //   		destination: destinationPlace,
-  //   		travelMode: google.maps.TravelMode.DRIVING
-  // 		};
-
-  // 		directionsService.route(request, function(result, status) {
-  //   		if (status == google.maps.DirectionsStatus.OK) {
-  //     			directionsDisplay.setDirections(result);
-  //   		}
-  // 		});
 	},
 
 	render: function() {
