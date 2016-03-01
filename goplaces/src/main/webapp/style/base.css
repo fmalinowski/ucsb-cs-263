@@ -76,6 +76,18 @@ input[type="text"]:focus {
 	margin-bottom: 15px;
 }
 
+.u-margin-bottom-xsmall {
+	margin-bottom: 5px;
+}
+
+.u-margin-right-xl {
+	margin-right: 30px;
+}
+
+.u-margin-right-small {
+	margin-right: 5px;
+}
+
 .u-left-right-align:after {
 	clear: both;
 }
@@ -223,4 +235,13 @@ input[type="text"]:focus {
     transform: scale(1.0);
     -webkit-transform: scale(1.0);
   }
+}
+
+.step-instruction {
+	border-bottom: 1px solid black;
+}
+
+.step-instruction__info {
+	display: inline-block;
+	width: 135px;
 }

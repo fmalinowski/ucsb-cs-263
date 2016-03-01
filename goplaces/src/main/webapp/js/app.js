@@ -119,31 +119,6 @@ var Map = React.createClass({
 
 		this.directionsDisplay.setDirections(mapDirections);
 		this.directionsDisplay.setMap(this.gmap);
-
-		// Make request with Javascript API (NO LONGER NEEDED AS WE FOUND A WORK AROUND AND USE JSON GIVEN BY OUR API)
-
-		// var directionsService = new google.maps.DirectionsService();
-		// var directionsDisplay = new google.maps.DirectionsRenderer();
-		// directionsDisplay.setMap(this.gmap);
-
-		// var originPlace = {
-		// 	placeId: mapDirections.geocoded_waypoints[0].place_id
-		// }
-		// var destinationPlace = {
-		// 	placeId: mapDirections.geocoded_waypoints[1].place_id
-		// }
-
-		// var request = {
-  //   		origin: originPlace,
-  //   		destination: destinationPlace,
-  //   		travelMode: google.maps.TravelMode.DRIVING
-  // 		};
-
-  // 		directionsService.route(request, function(result, status) {
-  //   		if (status == google.maps.DirectionsStatus.OK) {
-  //     			directionsDisplay.setDirections(result);
-  //   		}
-  // 		});
 	},
 
 	drawMarkerForPlace: function(placeJSON, color) {
@@ -436,6 +411,7 @@ var FinalRouteController = React.createClass({
 			data: jsonString,
 			success: function(data) {
 				console.log("handleWaypointsSubmit, success: " + data);
+				window.location.href = '/finalroute.html#' + this.props.routeID;
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());

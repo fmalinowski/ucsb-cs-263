@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Go Places</title>
+    
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="style/icons.css" />
+    <link rel="stylesheet" href="style/base.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.0/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="js/randomColor.js"></script>
+  </head>
+  <body>
+    <header>
+      <h1 class="header-title">Go Places</h1>
+    </header>
+    <div class="loading-screen loading-screen--hidden">
+      <div class="spinner">
+        <div class="dot1"></div>
+        <div class="dot2"></div>
+      </div>
+      Please Wait...
+    </div>
+    <div id="container" class="container">
+    </div>
+
+    <footer>Developed by Aviral Takkar and Francois Malinowski</footer>
+
+    <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDJBrd2qfr_f-U91N50-0RRBQl0r2kHIUo&libraries=geometry"></script>
+    <script type="text/babel" src="js/finalroute.js"></script>
+  </body>
+</html>
