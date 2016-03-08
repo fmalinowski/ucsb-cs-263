@@ -3,15 +3,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.IOException;
-import java.util.logging.*;
 import com.google.appengine.api.datastore.*;
 import com.google.appengine.api.memcache.*;
-import goplaces.models.Place;
 import goplaces.models.Route;
 import org.json.JSONObject;
 
 /**
- * Mapped to /routes.
+ * Mapped to /routesapi.
  * GET, POST and DELETE are supported to manipulate Route objects in the datastore.
  *
  * @author Aviral Takkar
@@ -30,8 +28,7 @@ public class RoutesAPI {
     UriInfo uriInfo;
     @Context
     Request request;
-    DatastoreService datastore;
-    MemcacheService syncCache;
+    DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -44,15 +41,16 @@ public class RoutesAPI {
             routeEntity.setProperty("destinationPlaceID", route.getDestination().getGooglePlaceId());
             routeEntity.setProperty("duration", route.getDuration());
             routeEntity.setProperty("distance", route.getDistance());
+            routeEntity.setProperty("origin", route.getOrigin().getAddress());
+            routeEntity.setProperty("destination", route.getDestination().getAddress());
 
             Text mapJsonAsText = route.getMapJsonAsText();
             routeEntity.setProperty("routeJSON", mapJsonAsText);
-            datastore = DatastoreServiceFactory.getDatastoreService();
             Key routeKey = datastore.put(routeEntity);
-            return new JSONObject().append("status","OK").append("key", routeKey.toString()).toString();
+            return new JSONObject().append("status","OK").append("key", routeKey.getId()).toString();
         }
         catch(Exception e){
-            return new JSONObject().append("status","ERROR").append("message", "Could not store object.")
+            return new JSONObject().append("status","fail").append("message", "Could not store object.")
                     .toString();
         }
     }
@@ -65,29 +63,45 @@ public class RoutesAPI {
         JSONObject reply = new JSONObject();
         try{
 
-            syncCache = MemcacheServiceFactory.getMemcacheService();
-            syncCache.setErrorHandler(ErrorHandlers.getConsistentLogAndContinue(Level.INFO));
-
-            String result = (String)syncCache.get(KeyFactory.createKey("Route", routeID));
-            if(result != null)
-                return reply.append("Found in", "memcache").append("Route Object", result).toString();
-
-            datastore = DatastoreServiceFactory.getDatastoreService();
             Entity result2 = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
-            System.out.println(3);
-            reply.append("Found in", "datastore").append("Origin ID", result2.getProperty("originPlaceID")).append
-                    ("Destination ID",
-                    result2
-                    .getProperty("destinationPlaceID"))
-                    .append("Duration", result2.getProperty("duration")).append("distance", result2.getProperty
-                    ("distance")).append("routeJSON", ((Text)result2.getProperty("routeJSON")).getValue()).append
-                    ("status","OK");
+            reply.append("status", "OK");
+            reply.append("message", "Found in datastore.");
+            reply.append("Origin ID", result2.getProperty("originPlaceID"));
+            reply.append("Destination ID", result2.getProperty("destinationPlaceID"));
+            reply.append("Duration", result2.getProperty("duration"));
+            reply.append("distance", result2.getProperty("distance"));
+            reply.append("origin", result2.getProperty("origin")).append("destination", result2.getProperty
+                    ("destination"));
+            Text routeJSON = (Text)result2.getProperty("routeJSON");
+            if (routeJSON != null)
+                reply.append("routeJSON", routeJSON.getValue());
 
             return reply.toString();
         }
         catch(Exception e){
-            return reply.append("status","ERROR").append("message","Route object with ID " + routeID + " not found.")
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return new JSONObject().append("status","fail").append("message","Route object with ID " + routeID + " not found.")
                     .toString();
+        }
+    }
+
+    @DELETE
+    @Path("{route_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String deletePlace(@PathParam("route_id") String routeId){
+        JSONObject reply = new JSONObject();
+        try{
+            datastore.delete(KeyFactory.createKey("Route", Long.parseLong(routeId)));
+            return reply.append("status", "OK").append("message", "successfully deleted route " + routeId)
+                    .toString();
+        }
+        catch(Exception e){
+            return new JSONObject().append("status", "fail").append("message", "Route object with ID " +
+                    routeId + " " +
+                    "not" +
+                    " " +
+                    "found.").toString();
         }
     }
 }
