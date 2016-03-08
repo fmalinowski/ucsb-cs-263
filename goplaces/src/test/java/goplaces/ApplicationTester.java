@@ -1,7 +1,6 @@
 package goplaces;
 
 import java.net.URI;
-import java.net.URL;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -10,9 +9,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import com.google.appengine.api.datastore.Key;
 import org.glassfish.jersey.client.ClientConfig;
-import org.json.JSONObject;
 
 public class ApplicationTester {
 
