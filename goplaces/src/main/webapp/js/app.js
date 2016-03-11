@@ -1,3 +1,6 @@
+/*
+ React component that handles the initial route form (origin, destination and submit button)
+ */
 var InitialRouteForm = React.createClass({
 	handleOriginChange: function(e) {
 		this.setState({origin: e.target.value});
@@ -50,15 +53,18 @@ var InitialRouteForm = React.createClass({
 			<div className="places-form u-center u-margin-bottom-xl">
 				<h2>1. Find the initial route</h2>
 				<form onSubmit={this.handleSubmit}>
-					<input type="text" placeholder="Origin place" className="places-form__textbox" onChange={this.handleOriginChange} />
-					<input type="text" placeholder="Destination place" className="places-form__textbox" onChange={this.handleDestinationChange} />
-					<input type="submit" value="Find Initial Route" className="form-submit-btn" />
+					<input type="text" placeholder="Origin place" className="places-form__textbox js-places-form-origin" onChange={this.handleOriginChange} />
+					<input type="text" placeholder="Destination place" className="places-form__textbox js-places-form-destination" onChange={this.handleDestinationChange} />
+					<input type="submit" value="Find Initial Route" className="form-submit-btn js-places-form-submit" />
 				</form>
 			</div>
 		);
 	}
 });
 
+/*
+ Google map React component
+ */
 var Map = React.createClass({
 	componentDidMount: function() {
 		this.gmap = new google.maps.Map(document.getElementById('map'), {
@@ -133,7 +139,8 @@ var Map = React.createClass({
 			position: placeJSON.geometry.location,
 			map: this.gmap,
 			title: placeJSON.name,
-			icon: pinImage
+			icon: pinImage,
+			optimized: false
 		});
 
 		var infowindow = new google.maps.InfoWindow();
@@ -229,6 +236,9 @@ var Map = React.createClass({
 	}
 });
 
+/*
+ React component that handles a single item of the legend below the google map
+ */
 var MapLegendItem = React.createClass({
 	render: function() {
 		return (
@@ -237,6 +247,9 @@ var MapLegendItem = React.createClass({
 	}
 });
 
+/*
+ React component that handles the legend of the map (below the map)
+ */
 var MapLegend = React.createClass({
 	render: function() {
 		if (this.props.colorLegend) {
@@ -259,6 +272,9 @@ var MapLegend = React.createClass({
 	}
 });
 
+/*
+ Waypoint input text field React component (to add a waypoint category)
+ */
 var WaypointEntry = React.createClass({
 	getInitialState: function() {
 		return {
@@ -273,11 +289,14 @@ var WaypointEntry = React.createClass({
 
 	render: function() {
 		return (
-			<input type="text" placeholder="Insert a waypoint category here" style={{width: "100%"}} value={this.state.value} onChange={this.handleValueChange} />
+			<input type="text" className="js-waypoint-form-textfield" placeholder="Insert a waypoint category here" style={{width: "100%"}} value={this.state.value} onChange={this.handleValueChange} />
 		);
 	}
 });
 
+/*
+ React component that handles the form to submit the waypoint categories
+ */
 var WaypointsForm = React.createClass({
 	getInitialState: function() {
 		return {
@@ -386,7 +405,7 @@ var WaypointsForm = React.createClass({
 
 					<div className="waypoints-form__submit-add">
 						<a href="#" className="form-add-btn u-float-right" onClick={this.handleAddCategory}>+</a>
-						<input type="submit" value="Submit Waypoint Categories" className="form-submit-btn" />
+						<input type="submit" value="Submit Waypoint Categories" className="form-submit-btn js-waypoints-form-submit-btn" />
 					</div>
 				</form>
 			</div>
@@ -394,6 +413,9 @@ var WaypointsForm = React.createClass({
 	}
 });
 
+/*
+ React component that handles the submission of the finalized route after having selected all the waypoints on the map
+ */
 var FinalRouteController = React.createClass({
 	handleWaypointsSubmit: function() {
 		var jsonToSend = {
@@ -431,6 +453,9 @@ var FinalRouteController = React.createClass({
 	}
 });
 
+/*
+ Main React Component (handles the whole page)
+ */
 var App = React.createClass({
 	getInitialState: function() {
 		return {
