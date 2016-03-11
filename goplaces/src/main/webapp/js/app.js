@@ -20,6 +20,8 @@ var InitialRouteForm = React.createClass({
 			return;
 		}
 
+		console.log("InitialRouteForm - Submitting initial route");
+
 		var jsonToSend = {
 			origin: {
 				address: origin
@@ -41,6 +43,7 @@ var InitialRouteForm = React.createClass({
 				// We receive data.status, data.routeId, data.googledirections
 				data.request = jsonToSend;
 				this.props.onFormSubmit(data);
+				console.log("InitialRouteForm - Got initial route from backend");
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
@@ -72,10 +75,12 @@ var Map = React.createClass({
           zoom: 8
         });
         this.placesSelected = {};
+        console.log("Map - google map is mounted");
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
 		if (this.props.directions) {
+			console.log("Map - is updated");
 			this.drawInitialDirections(this.props.directions);
 		}
 	},
@@ -91,6 +96,8 @@ var Map = React.createClass({
 		if (this.directionsDisplay != null) {
 			this.directionsDisplay.setMap(null);
 		}
+
+		console.log("Map - drawing route on map");
 
 		this.directionsDisplay = new google.maps.DirectionsRenderer();
 
@@ -213,6 +220,8 @@ var Map = React.createClass({
 		var places = placesJSONObject.places;
 		var colors = placesJSONObject.colors;
 
+		console.log("Map - display place markers");
+
 		for (var key in places) {
 			var placesForKey = places[key];
 
@@ -253,6 +262,7 @@ var MapLegendItem = React.createClass({
 var MapLegend = React.createClass({
 	render: function() {
 		if (this.props.colorLegend) {
+			console.log("MapLegend - colorLegend is ready");
 			var mapLegendItems = [];
 			var colors = this.props.colorLegend;
 
@@ -316,6 +326,7 @@ var WaypointsForm = React.createClass({
 
 		var waypointCategories = this.state.waypointCategories;
 		waypointCategories.push('');
+		console.log("WaypointsForm - handleAddCategory");
 
 		this.setState({waypointCategories: waypointCategories});	
 	},
@@ -373,6 +384,7 @@ var WaypointsForm = React.createClass({
 					this.props.onPolledPlaces(JSON.parse(data.places));
 					$(".loading-screen").addClass("loading-screen--hidden");
 				} else if (data.status === "POLL") {
+					console.log("WaypointsForm - Polling data");
 					setTimeout(this.pollWaypoints, 1000);
 				}
 
@@ -424,6 +436,7 @@ var FinalRouteController = React.createClass({
 		};
 
 		var jsonString = JSON.stringify(jsonToSend);
+		console.log("FinalRouteController - submitting selected waypoints on map");
 
 		$.ajax({
 			url: this.props.url,
