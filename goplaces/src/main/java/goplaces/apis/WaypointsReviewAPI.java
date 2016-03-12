@@ -20,7 +20,6 @@ import java.io.IOException;
  *
  * @author Aviral Takkar
  *
- * TODO Document the curl command to access API using POST request.
  *
  * POST - curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: a053ea25-82ca-9d9b-4cfa-f791f2ada6d6" -d '{
  * "place_ids":"[ChIJ1YMtb8cU6YARSHa612Q60cg]"
