@@ -58,14 +58,24 @@ public class PlacesAPI {
     public String getPlace(@PathParam("place_id") String googlePlaceId) {
         JSONObject reply = new JSONObject();
         try{
+
             Entity result2 = datastore.get(KeyFactory.createKey("Place", googlePlaceId));
+
             Text reviews = (Text)result2.getProperty("reviews");
-            reply.append("status", "OK").append("message", "Found in datastore.").append("Name", result2.getProperty
-                    ("name")).append("Address",
-                    result2
-                    .getProperty("address"))
-                    .append("Latitude", result2.getProperty("latitude")).append("longitude", result2.getProperty
-                    ("longitude")).append("rating", result2.getProperty("rating")).append("reviews", reviews.getValue());
+
+            reply.append("status", "OK").append("message", "Found in datastore.");
+
+            if(result2.getProperty("name") != null)
+                reply.append("Name", result2.getProperty("name"));
+
+            if(result2.getProperty("address") != null)
+                reply.append("Address", result2.getProperty("address"));
+
+            if(result2.getProperty("rating") != null)
+                reply.append("rating", result2.getProperty("rating"));
+
+            if(reviews != null)
+                reply.append("reviews", reviews.getValue());
 
             return reply.toString();
         }

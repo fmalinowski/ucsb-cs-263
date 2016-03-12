@@ -14,7 +14,7 @@ import org.glassfish.jersey.client.ClientConfig;
 public class ApplicationTester {
 
     private static final String LOG_TAG = "ApplicationTester";
-    private static Response placeResponse, routeResponse;
+    private static Response placeResponse, routeResponse, waypointsreviewResponse;
     private static final String EXISTING_ROUTE_KEY = "5076495651307520";
 
     public static void main(String[] args) throws Exception {
@@ -23,12 +23,11 @@ public class ApplicationTester {
             System.err.println("USAGE for app_engine: java -cp ... DSTester appid.appspot.com 0000");
             System.exit(1);
         }
-        String host = "http://localhost:8080/";
-        if (args[1] != "0000"){
-            host = "https://"+args[0]+"/";
-        } else {
+        String host;
+        if(!args[1].equals("0000"))
             host = "http://"+args[0]+":"+args[1]+"/";
-        }
+        else
+            host = "http://"+args[0]+"/";
 
         URI this_uri = UriBuilder.fromUri(host).build();
 
@@ -93,6 +92,34 @@ public class ApplicationTester {
         }
         catch(Exception e){
             System.err.println(LOG_TAG + " operation: get existing place/route entity. error.");
+            e.printStackTrace();
+        }
+
+        // Use the waypointsreviewapi
+        try{
+            String place_ids = "{\"place_ids\":\"[ChIJ1YMtb8cU6YARSHa612Q60cg]\"}";
+
+            waypointsreviewResponse = service.path("rest").path("waypointsreviewapi").request(MediaType
+                    .APPLICATION_JSON)
+                    .put(Entity.entity(place_ids,MediaType.APPLICATION_JSON),Response.class);
+            assert(waypointsreviewResponse.getStatus() == 201);
+
+            // Give it about 2 seconds to get waypoint review.
+            Thread.currentThread().sleep(2 * 1000);
+
+
+
+            waypointsreviewResponse = service.path("rest").path("waypointsreviewapi").path
+                    ("ChIJ1YMtb8cU6YARSHa612Q60cg").request(MediaType.APPLICATION_JSON).accept
+                    (MediaType.APPLICATION_JSON).get();
+            assert(waypointsreviewResponse.getStatus() == 200);
+
+            System.out.println(LOG_TAG + " operation: get existing place review. status: " + waypointsreviewResponse.getStatus());
+
+            System.out.println("Test 4 passed.");
+        }
+        catch(Exception e){
+            System.err.println(LOG_TAG + " operation: use the waypointsreviewapi. error.");
             e.printStackTrace();
         }
     }
