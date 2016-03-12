@@ -46,13 +46,4 @@
     	<url-pattern>/remote_api</url-pattern>
 	</servlet-mapping>
 
-	<servlet>
-		<servlet-name>EnqueueBoxRouteWorkerTask</servlet-name>
-		<servlet-class>goplaces.apis.BoxRouteWorkerAPI</servlet-class>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>EnqueueBoxRouteWorkerTask</servlet-name>
-		<url-pattern>/enqueue_boxrouteworker_task</url-pattern>
-	</servlet-mapping>
-
 </web-app>

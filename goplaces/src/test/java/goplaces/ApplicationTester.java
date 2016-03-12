@@ -16,6 +16,7 @@ public class ApplicationTester {
     private static final String LOG_TAG = "ApplicationTester";
     private static Response placeResponse, routeResponse, waypointsreviewResponse;
     private static final String EXISTING_ROUTE_KEY = "5076495651307520";
+    private static Object waitOnMe;
 
     public static void main(String[] args) throws Exception {
         if (args.length != 2) {
@@ -105,8 +106,11 @@ public class ApplicationTester {
             assert(waypointsreviewResponse.getStatus() == 201);
 
             // Give it about 2 seconds to get waypoint review.
-            Thread.currentThread().sleep(2 * 1000);
+            waitOnMe = new Object();
 
+            synchronized (waitOnMe){
+                waitOnMe.wait(2 * 1000);
+            }
 
 
             waypointsreviewResponse = service.path("rest").path("waypointsreviewapi").path

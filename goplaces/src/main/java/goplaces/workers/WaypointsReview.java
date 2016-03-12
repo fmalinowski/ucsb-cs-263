@@ -84,6 +84,7 @@ public class WaypointsReview extends HttpServlet {
 		StringBuilder place_ids_builder = new StringBuilder(request.getParameter("places")).deleteCharAt(0);
 		place_ids_builder.deleteCharAt(place_ids_builder.length() - 1);
 
+		System.out.println("WaypointsReview place ids received: " + place_ids_builder);
 		String[] place_ids = place_ids_builder.toString().split(",");
 
 		System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);

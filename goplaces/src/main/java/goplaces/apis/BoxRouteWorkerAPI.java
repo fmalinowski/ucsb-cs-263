@@ -8,10 +8,7 @@ import goplaces.models.CustomizeRouteQuery;
 import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -53,7 +50,7 @@ public class BoxRouteWorkerAPI{
                 StringBuilder keywords = new StringBuilder();
                 for(String keyword : route.getKeywords())
                     keywords.append(keyword + ",");
-                System.out.println(1);
+                System.out.println(1 + " Route ID " + Long.parseLong(route_id));
                 Entity originalRouteEntity = datastore.get(KeyFactory.createKey("Route", Long.parseLong(route_id)));
                 if(originalRouteEntity == null){
                     return new JSONObject().append("status", "fail").append("message", "route not found in datastore" +
@@ -76,4 +73,30 @@ public class BoxRouteWorkerAPI{
             }
             return new JSONObject().append("status", "fail").append("message","something went wrong").toString();
         }
+
+    @GET
+    @Path("{route_id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getPlace(@PathParam("route_id") String routeID) {
+        JSONObject reply = new JSONObject();
+        try{
+
+            Entity result2 = datastore.get(KeyFactory.createKey("Route", Long.parseLong(routeID)));
+            if(result2 == null || result2.getProperty("placesJSON") == null)
+                return reply.append("status", "fail").append("message", "Could not find places around the given route" +
+                        " in datastore.").append("routeID", routeID).toString();
+
+            reply.append("status", "OK");
+            reply.append("message", "Found in datastore.");
+            reply.append("routeID", routeID);
+            reply.append("placesJSON",((Text)(result2.getProperty("placesJSON"))).getValue());
+            return reply.toString();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+            return new JSONObject().append("status","fail").append("message","something went wrong")
+                    .toString();
+        }
+    }
 }
