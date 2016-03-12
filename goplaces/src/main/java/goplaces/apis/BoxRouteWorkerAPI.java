@@ -18,16 +18,18 @@ import java.io.IOException;
 
 /**
  * Mapped to /enqueue_boxrouteworker_task.
- * This API supports POST requests to add BoxRouteWorker background task to the default queue.
+ * This API supports GET and POST requests to add BoxRouteWorker background task to the default queue.
  *
  * @author Aviral Takkar
  *
- * TODO add support for GET curl command
+ *
  * POST - curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: e21b5c97-cddf-1ae6-c2a9-96d7c3eb08de" -d '{
- * "routeID":"5066549580791808",
+ * "routeID":"5081456606969856",
  * "radius":"10",
  * "keywords":["pet park","museum"]
  * }' "http://localhost:8080/rest/boxrouteworkerapi"
+ *
+ * GET - curl -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: 888a79a6-8bad-73cd-df51-c90edb0aba6a" "http://go-places-ucsb.appspot.com/rest/boxrouteworkerapi/5081456606969856"
  */
 
 @Path("/boxrouteworkerapi")
@@ -95,7 +97,7 @@ public class BoxRouteWorkerAPI{
         catch(Exception e){
             e.printStackTrace();
             System.out.println(e.getMessage());
-            return new JSONObject().append("status","fail").append("message","something went wrong")
+            return new JSONObject().append("status","fail").append("message","no such route")
                     .toString();
         }
     }
