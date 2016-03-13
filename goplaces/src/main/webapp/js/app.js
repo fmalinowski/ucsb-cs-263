@@ -21,6 +21,7 @@ var InitialRouteForm = React.createClass({
 		}
 
 		console.log("InitialRouteForm - Submitting initial route");
+		$(".loading-screen").removeClass("loading-screen--hidden");
 
 		var jsonToSend = {
 			origin: {
@@ -44,9 +45,11 @@ var InitialRouteForm = React.createClass({
 				data.request = jsonToSend;
 				this.props.onFormSubmit(data);
 				console.log("InitialRouteForm - Got initial route from backend");
+				$(".loading-screen").addClass("loading-screen--hidden");
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
+				$(".loading-screen").addClass("loading-screen--hidden");
 			}.bind(this)
 		});
 	},
@@ -112,6 +115,8 @@ var ReviewsDisplayer = React.createClass({
  */
 var Map = React.createClass({
 	getInitialState: function() {
+		this.markers = [];
+
 		return {
 			reviews: null
 		};
@@ -205,7 +210,6 @@ var Map = React.createClass({
   		var selector = '.js-iw-' + placeJSON.place_id + ' .js-select-place';
 
   		$(document).on('click', selector, function(e) {
-  			debugger;
 			this.handleSelectedWaypoint(placeJSON, marker, pinColor);
 		}.bind(this));
 
@@ -227,6 +231,8 @@ var Map = React.createClass({
 			// Close the reviews
 			this.setState({reviews: null});
 		}.bind(this));
+
+		this.markers.push(marker);
 	},
 
 	handleSelectedWaypoint: function(placeJSON, marker, defaultPinColor) {
@@ -234,8 +240,6 @@ var Map = React.createClass({
 		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
 
 		var isPlaceSelected = this.placesSelected[placeJSON.place_id];
-
-		debugger;
 
 		if (isPlaceSelected === true) {
 			this.placesSelected[placeJSON.place_id] = false;
@@ -275,6 +279,9 @@ var Map = React.createClass({
 
 	displayPlacesMarkers: function(placesJSONObject) {
 		console.log("displayPlacesMarkers called");
+		this.clearMap();
+		this.places = placesJSONObject;
+
 		var places = placesJSONObject.places;
 		var colors = placesJSONObject.colors;
 
@@ -322,10 +329,59 @@ var Map = React.createClass({
 		});
 	},
 
+	clearMap: function() {
+		for (var i = 0; i < this.markers.length; i++) {
+			this.markers[i].setMap(null);
+		}
+		this.markers = [];
+		this.markersAlreadyDisplayed = false;
+		this.places = null;
+		this.props.handleSelectedWaypoints([]);
+	},
+
+	shouldRenderMarkers: function() {
+		// return this.props.places && !this.markersAlreadyDisplayed;
+
+		debugger;
+		if (this.places == null && this.props.places !== null) {
+			return true;
+		}
+		if (Array.isArray(this.places) && Array.isArray(this.props.places)) {
+			if (this.places.length !== this.props.places.length) {
+				return true;
+			}
+			for (var i = 0; i < this.places.length; i++) {
+				if (this.places[i].place_id !== this.props.places[i].place_id) {
+					return true;
+				}
+			}
+		}
+		return false;
+	},
+
+	shouldClearMap: function() {
+		if (this.routeID !== this.props.routeID) {
+			this.routeID = this.props.routeID;
+			return true;
+		}
+
+		return false;
+	},
+
 	render: function() {
 		var cssClasses = 'map-container u-margin-bottom-xl';
+		var reviews = this.state.reviews;
 
-		if (this.props.places && !this.markersAlreadyDisplayed) {
+		if (this.shouldClearMap()) {
+			this.clearMap();
+			reviews = null;
+		}
+
+		// if (this.props.clearMarkersOnMap) {
+		// 	this.clearMap();
+		// }
+
+		if (this.shouldRenderMarkers()) {
 			this.displayPlacesMarkers(this.props.places);
 			var cssClasses = 'map-container u-margin-bottom-small';
 		}
@@ -333,7 +389,7 @@ var Map = React.createClass({
 		return (
 			<div style={{position: "relative"}}>
 				<div id="map" className={cssClasses}></div>
-				<ReviewsDisplayer reviews={this.state.reviews} />
+				<ReviewsDisplayer reviews={reviews} />
 			</div>
 		);
 	}
@@ -571,7 +627,8 @@ var App = React.createClass({
 			request: null,
 			places: null,
 			selectedPlaces: null,
-			colorLegend: null
+			colorLegend: null,
+			clearMarkersOnMap: true
 		}
 	},
 
@@ -584,7 +641,11 @@ var App = React.createClass({
 		var route = {
 			routeID: routeID,
 			mapDirections: googleMapDirections,
-			request: request
+			request: request, 
+			places: null,
+			selectedPlaces: null,
+			colorLegend: null,
+			clearMarkersOnMap: true
 		};
 
 		console.log("APP, handleInitialRouteSubmit, routeID: " + routeID);
@@ -616,7 +677,9 @@ var App = React.createClass({
 		var placesForState = {
 			mapDirections: null,
 			places: placesObject,
-			colorLegend: placesColors
+			colorLegend: placesColors,
+			clearMarkersOnMap: false,
+			selectedPlaces: null
 		}
 		this.setState(placesForState);
 	},
@@ -633,7 +696,8 @@ var App = React.createClass({
 
 		this.setState({
 			selectedPlaces: selectedPlacesArray,
-			places: null
+			places: null, 
+			clearMarkersOnMap: false
 		});
 	},
 
@@ -642,9 +706,9 @@ var App = React.createClass({
 			<div className="App">
 				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints} reviewsUrl="/rest/waypointsreviewapi" />
+				<Map routeID={this.state.routeID} directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints} clearMarkersOnMap={this.state.clearMarkersOnMap} reviewsUrl="/rest/waypointsreviewapi" />
 				<MapLegend colorLegend={this.state.colorLegend} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={50000} onPolledPlaces={this.handleReturnedPlaces} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={10000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);
 	}

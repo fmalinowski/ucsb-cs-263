@@ -59,7 +59,7 @@ import com.google.appengine.api.taskqueue.*;
 
 
 public class BoxRouteWorker extends HttpServlet {
-	private final static int RADIUS_TO_LOOK_FOR_PLACES = 5000; // 5000 meters
+	private final static int RADIUS_TO_LOOK_FOR_PLACES = 50000; // 5000 meters
 	private final static int FINAL_PLACES_NUMBER_PER_REQUEST = 100;
 	
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
