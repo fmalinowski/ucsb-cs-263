@@ -1,5 +1,7 @@
 # Test using cURL commands
 
+# Route ID - 5073076857339904. This route exists in the datastore and can be used for testing.
+
 # Places Datastore API
 # post a place to datastore
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data "{\"name\":\"UCSB\",\"address\":\"At the Pacific shore,California\",\"latitude\":5.6,\"longitude\":6.6,\"rating\":5.0,\"reviews\":\"its magnificient\",\"googlePlaceId\":\"example\"}" http://go-places-ucsb.appspot.com/rest/places
@@ -25,7 +27,7 @@ echo
 # Routes Memcache API
 # post a route to memcache
 curl -i -H "Accept: application/json" -H "Content-Type: application/json" -X POST --data "{\"origin\":{\"address\":\"santa barbara\"},\"destination\":{\"address\":\"los angeles\"},\"mapJsonAsText\":\"xyz\"}" http://go-places-ucsb.appspot.com/rest/routesmemcache
-# get the same route from datastore
+# get the same route from memcache
 # route_id=set_this_to_a_known_id_in_datastore_or_the_key_returned_on_running_the preceding_curl_command
 # curl "http://go-places-ucsb.appspot.com/rest/routesmemcache/$route_id"
 echo
