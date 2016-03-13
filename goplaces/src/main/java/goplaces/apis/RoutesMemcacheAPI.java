@@ -16,7 +16,6 @@ import org.json.JSONObject;
  *
  * @author Aviral Takkar
  *
- * TODO Document curl commands
  * Curl examples:
  *
  * GET - curl "http://go-places-ucsb.appspot.com/rest/routesmemcache/{route_id}"
