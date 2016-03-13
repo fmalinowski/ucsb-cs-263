@@ -65,10 +65,58 @@ var InitialRouteForm = React.createClass({
 	}
 });
 
+var ReviewItem = React.createClass({
+	render: function() {
+		var review = this.props.review;
+
+		return (
+			<div className="review-item">
+				<strong>Author: </strong> {review.author_name}<br />
+				<strong>Rating: </strong> {review.rating}<br />
+				<div className="review-item__comment">{review.text}</div>
+			</div>
+		);
+	}
+});
+
+/*
+	React component displaying the reviews of a place
+*/
+var ReviewsDisplayer = React.createClass({
+	render: function() {
+		if (!this.props.reviews) {
+			return null;
+		}
+
+		var reviewsObj = this.props.reviews;
+		var rating = reviewsObj.rating ? (reviewsObj.rating + '/5') : 'unknown';
+
+		var reviewItems = reviewsObj.reviews.map(function(review, index) {
+			return (
+				<ReviewItem review={review} key={index} />
+			);
+		});
+
+		return (
+			<div className="reviews-displayer">
+				<h3 className="u-center u-margin-bottom-xsmall">Reviews</h3>
+				<h4 className="u-center u-margin-top-xsmall">Rated: {rating}</h4>
+				{reviewItems}
+			</div>
+		);
+	}
+});
+
 /*
  Google map React component
  */
 var Map = React.createClass({
+	getInitialState: function() {
+		return {
+			reviews: null
+		};
+	},
+
 	componentDidMount: function() {
 		this.gmap = new google.maps.Map(document.getElementById('map'), {
           center: {lat: 34.4139629, lng: -119.8511357},
@@ -157,6 +205,7 @@ var Map = React.createClass({
   		var selector = '.js-iw-' + placeJSON.place_id + ' .js-select-place';
 
   		$(document).on('click', selector, function(e) {
+  			debugger;
 			this.handleSelectedWaypoint(placeJSON, marker, pinColor);
 		}.bind(this));
 
@@ -168,7 +217,16 @@ var Map = React.createClass({
 			}
 			this.infoWindow = infowindow;
 			infowindow.open(map, marker);
+
+			// Fetch the reviews
+			this.fetchReviewsForPlace(placeJSON.place_id, placeJSON.name);
+
   		}.bind(this));
+
+		infowindow.addListener('closeclick', function() {
+			// Close the reviews
+			this.setState({reviews: null});
+		}.bind(this));
 	},
 
 	handleSelectedWaypoint: function(placeJSON, marker, defaultPinColor) {
@@ -176,6 +234,8 @@ var Map = React.createClass({
 		var $selectButton = $(document).find('.js-iw-' + placeJSON.place_id + ' .js-select-place');
 
 		var isPlaceSelected = this.placesSelected[placeJSON.place_id];
+
+		debugger;
 
 		if (isPlaceSelected === true) {
 			this.placesSelected[placeJSON.place_id] = false;
@@ -210,8 +270,6 @@ var Map = React.createClass({
 		'<br>' + buttonCode +
 		'</div>';
 
-		$('.js-select-place')
-
 		return contentString;
 	},
 
@@ -229,18 +287,54 @@ var Map = React.createClass({
 				this.drawMarkerForPlace(placesForKey[i], colors[key]);
 			}
 		}
+
+		this.markersAlreadyDisplayed = true;
+	},
+
+	fetchReviewsForPlace: function(placeId, placeName) {
+		var reviewsUrl = this.props.reviewsUrl + "/" + placeId;
+
+		this.setState({reviews: null});
+
+		$.ajax({
+			url: reviewsUrl,
+			contentType: 'application/json',
+			type: 'GET',
+			success: function(data) {
+				console.log("fetchReviewsForPlace, success: " + JSON.stringify(data));
+
+				if (data.status !== null && Array.isArray(data.status) && data.status.length > 0 && data.status[0] === 'OK') {
+					var rating = (data.rating !== null && Array.isArray(data.rating) && data.rating.length > 0) ? data.rating[0] : null;
+					var reviewsArray = (data.reviews !== null && Array.isArray(data.reviews) && data.reviews.length > 0) ? JSON.parse(data.reviews[0]) : null;
+					
+					var reviews = {
+						placeName: placeName,
+						rating: rating,
+						reviews: reviewsArray
+					}
+
+					this.setState({reviews: reviews});
+				}
+			}.bind(this),
+			error: function(xhr, status, err) {
+				console.error(reviewsUrl, status, err.toString());
+			}.bind(this)
+		});
 	},
 
 	render: function() {
 		var cssClasses = 'map-container u-margin-bottom-xl';
 
-		if (this.props.places) {
+		if (this.props.places && !this.markersAlreadyDisplayed) {
 			this.displayPlacesMarkers(this.props.places);
 			var cssClasses = 'map-container u-margin-bottom-small';
 		}
 
 		return (
-			<div id="map" className={cssClasses}></div>
+			<div style={{position: "relative"}}>
+				<div id="map" className={cssClasses}></div>
+				<ReviewsDisplayer reviews={this.state.reviews} />
+			</div>
 		);
 	}
 });
@@ -548,9 +642,9 @@ var App = React.createClass({
 			<div className="App">
 				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints}/>
+				<Map directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints} reviewsUrl="/rest/waypointsreviewapi" />
 				<MapLegend colorLegend={this.state.colorLegend} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={5000} onPolledPlaces={this.handleReturnedPlaces} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={50000} onPolledPlaces={this.handleReturnedPlaces} />
 			</div>
 		);
 	}
