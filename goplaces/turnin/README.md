@@ -1,6 +1,6 @@
 ### 1. [Presentation](https://docs.google.com/presentation/d/1gq9CSK326j1JeNT9wBxwPIgMIjG17SPbuzkdrCKf3mc/edit?usp=sharing) 
 
-### 2. Testing using _curl_commands.sh_
+### 2. Testing using cURL (_curl_commands.sh_)
 
 **Note**: Some cURL commands have been commented out in the script. These require certain input from the user before they can be run. More directions can be found in the comments.
 
