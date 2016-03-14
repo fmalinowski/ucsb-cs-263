@@ -212,7 +212,7 @@ input[type="text"]:focus {
 	text-align: center;
 	top: 65px;
 	width: 100%;
-	z-index: 1;
+	z-index: 4;
 }
 
 .loading-screen--hidden {

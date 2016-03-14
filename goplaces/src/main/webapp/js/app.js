@@ -336,7 +336,7 @@ var Map = React.createClass({
 		this.markers = [];
 		this.markersAlreadyDisplayed = false;
 		this.places = null;
-		this.props.handleSelectedWaypoints([]);
+		this.placesSelected = {};
 	},
 
 	shouldRenderMarkers: function() {
@@ -548,6 +548,10 @@ var WaypointsForm = React.createClass({
 
 	render: function() {
 		var that = this;
+
+		if (this.props.routeID === null) {
+			return null;
+		}
 
 		var waypointNodes = this.state.waypointCategories.map(function(category, index) {
 			return (
