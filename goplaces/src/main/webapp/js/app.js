@@ -551,7 +551,7 @@ var WaypointsForm = React.createClass({
 				<h2 className="u-center">2. Insert the waypoint categories</h2>
 				
 				<div className="u-margin-bottom-small">Insert the categories of waypoints you want to have on your route. <br />
-				e.g.: Café, night club, museum, restaurant, zoo, etc.</div>
+				e.g.: Art museum, pet park, night club, zoo, chinese restaurant etc.</div>
 				
 				<form onSubmit={this.handleSubmitCategories}>
 					{waypointNodes}
