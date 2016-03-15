@@ -1,4 +1,4 @@
-### 1. [Presentation](TODO)
+### 1. [Presentation](https://www.youtube.com/watch?v=tEL38hCWNkI)
 
 ### 2. [Slides](https://docs.google.com/presentation/d/1gq9CSK326j1JeNT9wBxwPIgMIjG17SPbuzkdrCKf3mc/edit?usp=sharing) 
 
