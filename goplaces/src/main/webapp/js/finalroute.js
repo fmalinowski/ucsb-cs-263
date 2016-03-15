@@ -60,7 +60,7 @@ var DrivingInstructions = React.createClass({
 			return (
 				<div>
 					<h1 className="u-center">Final route #{this.props.routeID}</h1>
-					<div className="u-center u-margin-bottom-small">Want to share this route this a friend? Here is the url: {window.location.href}</div>
+					<div className="u-center u-margin-bottom-small">Want to share this route with a friend? Here's the link: {window.location.href}</div>
 					{legsInstructions}
 				</div>
 			);
