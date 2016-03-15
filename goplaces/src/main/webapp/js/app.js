@@ -20,7 +20,6 @@ var InitialRouteForm = React.createClass({
 			return;
 		}
 
-		console.log("InitialRouteForm - Submitting initial route");
 		$(".loading-screen").removeClass("loading-screen--hidden");
 
 		var jsonToSend = {
@@ -44,7 +43,6 @@ var InitialRouteForm = React.createClass({
 				// We receive data.status, data.routeId, data.googledirections
 				data.request = jsonToSend;
 				this.props.onFormSubmit(data);
-				console.log("InitialRouteForm - Got initial route from backend");
 				$(".loading-screen").addClass("loading-screen--hidden");
 			}.bind(this),
 			error: function(xhr, status, err) {
@@ -116,6 +114,7 @@ var ReviewsDisplayer = React.createClass({
 var Map = React.createClass({
 	getInitialState: function() {
 		this.markers = [];
+		this.places = null;
 
 		return {
 			reviews: null
@@ -128,12 +127,10 @@ var Map = React.createClass({
           zoom: 8
         });
         this.placesSelected = {};
-        console.log("Map - google map is mounted");
 	},
 
 	componentDidUpdate: function(prevProps, prevState) {
 		if (this.props.directions) {
-			console.log("Map - is updated");
 			this.drawInitialDirections(this.props.directions);
 		}
 	},
@@ -149,8 +146,6 @@ var Map = React.createClass({
 		if (this.directionsDisplay != null) {
 			this.directionsDisplay.setMap(null);
 		}
-
-		console.log("Map - drawing route on map");
 
 		this.directionsDisplay = new google.maps.DirectionsRenderer();
 
@@ -278,14 +273,11 @@ var Map = React.createClass({
 	},
 
 	displayPlacesMarkers: function(placesJSONObject) {
-		console.log("displayPlacesMarkers called");
 		this.clearMap();
-		this.places = placesJSONObject;
+		this.places = placesJSONObject.places;
 
 		var places = placesJSONObject.places;
 		var colors = placesJSONObject.colors;
-
-		console.log("Map - display place markers");
 
 		for (var key in places) {
 			var placesForKey = places[key];
@@ -294,8 +286,6 @@ var Map = React.createClass({
 				this.drawMarkerForPlace(placesForKey[i], colors[key]);
 			}
 		}
-
-		this.markersAlreadyDisplayed = true;
 	},
 
 	fetchReviewsForPlace: function(placeId, placeName) {
@@ -308,7 +298,6 @@ var Map = React.createClass({
 			contentType: 'application/json',
 			type: 'GET',
 			success: function(data) {
-				console.log("fetchReviewsForPlace, success: " + JSON.stringify(data));
 
 				if (data.status !== null && Array.isArray(data.status) && data.status.length > 0 && data.status[0] === 'OK') {
 					var rating = (data.rating !== null && Array.isArray(data.rating) && data.rating.length > 0) ? data.rating[0] : null;
@@ -334,27 +323,27 @@ var Map = React.createClass({
 			this.markers[i].setMap(null);
 		}
 		this.markers = [];
-		this.markersAlreadyDisplayed = false;
 		this.places = null;
 		this.placesSelected = {};
 	},
 
 	shouldRenderMarkers: function() {
-		// return this.props.places && !this.markersAlreadyDisplayed;
-
-		debugger;
-		if (this.places == null && this.props.places !== null) {
+		var newPlaces = this.props.places !== null && this.props.places.places !== null ? this.props.places.places : null;
+		if (this.places == null && newPlaces !== null) {
 			return true;
 		}
-		if (Array.isArray(this.places) && Array.isArray(this.props.places)) {
-			if (this.places.length !== this.props.places.length) {
+		if (this.places !== null && newPlaces !== null) {
+			var keysNumberInPlaces = Object.keys(this.places).length;
+			var keysNumberInNewPlacesObject = Object.keys(newPlaces).length;
+			if (keysNumberInPlaces !== keysNumberInNewPlacesObject) {
 				return true;
 			}
-			for (var i = 0; i < this.places.length; i++) {
-				if (this.places[i].place_id !== this.props.places[i].place_id) {
+			for (var key in this.places) {
+				if (newPlaces[key] === undefined) {
 					return true;
 				}
 			}
+			return false;
 		}
 		return false;
 	},
@@ -376,10 +365,6 @@ var Map = React.createClass({
 			this.clearMap();
 			reviews = null;
 		}
-
-		// if (this.props.clearMarkersOnMap) {
-		// 	this.clearMap();
-		// }
 
 		if (this.shouldRenderMarkers()) {
 			this.displayPlacesMarkers(this.props.places);
@@ -412,7 +397,6 @@ var MapLegendItem = React.createClass({
 var MapLegend = React.createClass({
 	render: function() {
 		if (this.props.colorLegend) {
-			console.log("MapLegend - colorLegend is ready");
 			var mapLegendItems = [];
 			var colors = this.props.colorLegend;
 
@@ -476,7 +460,6 @@ var WaypointsForm = React.createClass({
 
 		var waypointCategories = this.state.waypointCategories;
 		waypointCategories.push('');
-		console.log("WaypointsForm - handleAddCategory");
 
 		this.setState({waypointCategories: waypointCategories});	
 	},
@@ -484,7 +467,6 @@ var WaypointsForm = React.createClass({
 	handleSubmitCategories: function(e) {
 		e.preventDefault();
 
-		// var categoriesArrayString = JSON.stringify(this.state.waypointCategories);
 		var url = this.props.url;
 		var jsonToSend = {
 			routeID: this.props.routeID,
@@ -493,9 +475,9 @@ var WaypointsForm = React.createClass({
 		};
 		var jsonString = JSON.stringify(jsonToSend);
 
-		// TODO: Send here the ajax to server with the waypoints we want to submit
-		console.log("WaypointsForm, handleSubmitCategories, submit: " + jsonString);
 		$(".loading-screen").removeClass("loading-screen--hidden");
+
+		this.pollAttempts = 0;
 
 		$.ajax({
 			url: url,
@@ -505,7 +487,6 @@ var WaypointsForm = React.createClass({
 			data: jsonString,
 			success: function(data) {
 				setTimeout(this.pollWaypoints, 1000);
-				console.log("WaypointsForm, handleSubmitCategories, success: " + JSON.stringify(data));
 			}.bind(this),
 			error: function(xhr, status, err) {
 				$(".loading-screen").addClass("loading-screen--hidden");
@@ -529,16 +510,21 @@ var WaypointsForm = React.createClass({
 			success: function(data) {
 				if (data.status === "OK") {
 					// We got here the places to display on the map
-					console.log("WaypointsForm, pollWaypoints, got places:");
-					console.log(JSON.parse(data.places));
 					this.props.onPolledPlaces(JSON.parse(data.places));
 					$(".loading-screen").addClass("loading-screen--hidden");
 				} else if (data.status === "POLL") {
-					console.log("WaypointsForm - Polling data");
-					setTimeout(this.pollWaypoints, 1000);
+					this.pollAttempts++;
+
+					if (this.pollAttempts > 50) {
+						// We polled for more than 70s. We should stop the query
+						alert("Congratulations, you broke our system! This query is taking too long... We don't support long routes or too many keywords yet.");
+						$(".loading-screen").addClass("loading-screen--hidden");
+						this.props.onPolledPlaces(null);
+					} else {
+						setTimeout(this.pollWaypoints, 1000);
+					}
 				}
 
-				console.log("WaypointsForm, pollWaypoints, success, status: " + data.status);
 			}.bind(this),
 			error: function(xhr, status, err) {
 				console.error(this.props.url, status, err.toString());
@@ -549,7 +535,7 @@ var WaypointsForm = React.createClass({
 	render: function() {
 		var that = this;
 
-		if (this.props.routeID === null) {
+		if (this.props.routeID === null || this.props.arePlacesPolled) {
 			return null;
 		}
 
@@ -590,7 +576,6 @@ var FinalRouteController = React.createClass({
 		};
 
 		var jsonString = JSON.stringify(jsonToSend);
-		console.log("FinalRouteController - submitting selected waypoints on map");
 
 		$.ajax({
 			url: this.props.url,
@@ -599,7 +584,6 @@ var FinalRouteController = React.createClass({
 			type: 'POST',
 			data: jsonString,
 			success: function(data) {
-				console.log("handleWaypointsSubmit, success: " + data);
 				window.location.href = '/finalroute.html#' + this.props.routeID;
 			}.bind(this),
 			error: function(xhr, status, err) {
@@ -632,7 +616,7 @@ var App = React.createClass({
 			places: null,
 			selectedPlaces: null,
 			colorLegend: null,
-			clearMarkersOnMap: true
+			arePlacesPolled: false
 		}
 	},
 
@@ -649,11 +633,8 @@ var App = React.createClass({
 			places: null,
 			selectedPlaces: null,
 			colorLegend: null,
-			clearMarkersOnMap: true
+			arePlacesPolled: false
 		};
-
-		console.log("APP, handleInitialRouteSubmit, routeID: " + routeID);
-		console.log("APP, handleInitialRouteSubmit, googleMapDirections: " + googleMapDirections);
 		
 		this.setState(route);
 	},
@@ -672,6 +653,9 @@ var App = React.createClass({
 	},
 
 	handleReturnedPlaces: function(placesJSONObject) {
+		if (placesJSONObject === null) {
+			return;
+		}
 		var placesColors = this.generateColorsForPlaces(placesJSONObject);
 		var placesObject = {
 			places: placesJSONObject,
@@ -682,15 +666,13 @@ var App = React.createClass({
 			mapDirections: null,
 			places: placesObject,
 			colorLegend: placesColors,
-			clearMarkersOnMap: false,
-			selectedPlaces: null
+			selectedPlaces: null,
+			arePlacesPolled: true
 		}
 		this.setState(placesForState);
 	},
 
 	handleSelectedWaypoints: function(selectedPlacesJSON) {
-		console.log("handleSelectedWaypoints called");
-
 		var selectedPlacesArray = [];
 		for (var place in selectedPlacesJSON) {
 			if (selectedPlacesJSON[place]) {
@@ -700,8 +682,7 @@ var App = React.createClass({
 
 		this.setState({
 			selectedPlaces: selectedPlacesArray,
-			places: null, 
-			clearMarkersOnMap: false
+			places: null
 		});
 	},
 
@@ -710,9 +691,9 @@ var App = React.createClass({
 			<div className="App">
 				<FinalRouteController selectedPlaces={this.state.selectedPlaces} routeID={this.state.routeID} url="/rest/get_custom_route" />
 				<InitialRouteForm url="/rest/routes" onFormSubmit={this.handleInitialRouteSubmit} />
-				<Map routeID={this.state.routeID} directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints} clearMarkersOnMap={this.state.clearMarkersOnMap} reviewsUrl="/rest/waypointsreviewapi" />
+				<Map routeID={this.state.routeID} directions={this.state.mapDirections} request={this.state.request} places={this.state.places} handleSelectedWaypoints={this.handleSelectedWaypoints} reviewsUrl="/rest/waypointsreviewapi" />
 				<MapLegend colorLegend={this.state.colorLegend} />
-				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={10000} onPolledPlaces={this.handleReturnedPlaces} />
+				<WaypointsForm url="/rest/select_waypoints" routeID={this.state.routeID} radius={10000} onPolledPlaces={this.handleReturnedPlaces} arePlacesPolled={this.state.arePlacesPolled} />
 			</div>
 		);
 	}
