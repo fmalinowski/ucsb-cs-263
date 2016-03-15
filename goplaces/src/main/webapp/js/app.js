@@ -409,6 +409,7 @@ var MapLegend = React.createClass({
 					<ul className="map-legend">
 						{mapLegendItems}
 					</ul>
+					Places are fetched in a radius of 10km along the route
 				</div>
 			);
 		}
