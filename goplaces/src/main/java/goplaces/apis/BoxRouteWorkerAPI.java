@@ -50,6 +50,10 @@ public class BoxRouteWorkerAPI{
                 String route_id = route.getRouteID();
                 String radius = String.valueOf(route.getRadius());
                 StringBuilder keywords = new StringBuilder();
+
+                if(route.getKeywords().length > 5)
+                    return new JSONObject().append("status","fail").append("message","too many keywords").toString();
+
                 for(String keyword : route.getKeywords())
                     keywords.append(keyword + ",");
                 System.out.println(1 + " Route ID " + Long.parseLong(route_id));
