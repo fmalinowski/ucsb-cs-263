@@ -21,8 +21,8 @@ public class BoxRouteWorkerTest {
 	}
 
 	// Commenting this out because I want to check the 100 (at most) places which are returned by BoxRouteWorker
-	//@Test
-	private void testFilterPlacesRandomly() {
+	@Test
+	public void testFilterPlacesRandomly() {
 		JSONObject initialJSONObject = new JSONObject();
 		int finalPlacesNumberPerRequest = 100;
 		
@@ -92,8 +92,8 @@ public class BoxRouteWorkerTest {
 		}
 	}
 	
-	//@Test
-	private void testFilterPlacesRandomly__when_only_few_places_per_key() {
+	@Test
+	public void testFilterPlacesRandomly__when_only_few_places_per_key() {
 		JSONObject initialJSONObject = new JSONObject();
 		
 		JSONArray jsonArrayForKey1 = new JSONArray();
