@@ -1,11 +1,13 @@
-### 1. [Presentation](https://www.youtube.com/watch?v=tEL38hCWNkI)
+### Project Artifacts
 
-### 2. [Slides](https://docs.google.com/presentation/d/1gq9CSK326j1JeNT9wBxwPIgMIjG17SPbuzkdrCKf3mc/edit?usp=sharing) 
+1. [Presentation](https://www.youtube.com/watch?v=tEL38hCWNkI)
 
-### 3. Testing using cURL (_curl_commands.sh_)
+2. [Slides](https://docs.google.com/presentation/d/1gq9CSK326j1JeNT9wBxwPIgMIjG17SPbuzkdrCKf3mc/edit?usp=sharing) 
 
-**Note**: Some cURL commands have been commented out in the script. These require certain input from the user before they can be run. More directions can be found in the comments.
+3. Testing using cURL (_curl_commands.sh_)
 
-To run script, make sure the permissions to execute _curl_commands.sh_ are set. Use _chmod_ to set them, if required.
+    **Note**: Some cURL commands have been commented out in the script. These require certain input from the user before they     can be run. More directions can be found in the comments.
 
-Run script `./curl_commands.sh`
+    To run script, make sure the permissions to execute _curl_commands.sh_ are set. Use _chmod_ to set them, if required.
+
+    Run script `./curl_commands.sh`
