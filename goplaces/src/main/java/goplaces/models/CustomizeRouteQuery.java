@@ -1,5 +1,9 @@
 package goplaces.models;
 
+/**
+ * This object is used as an exchange message between SelectWaypointsResource the background task boxrouteworker.
+ */
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

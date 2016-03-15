@@ -1,5 +1,10 @@
 package goplaces.resources;
 
+/**
+ * This class serves as an endpoint to receive a route and search criteria for finding places of
+ * interest along it from the web UI.
+ */
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

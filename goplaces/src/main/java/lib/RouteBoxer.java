@@ -1,5 +1,11 @@
 package lib;
 
+/**
+ * This class calculates searchable regions along the length of a route.
+ *
+ * Note: We used this class experimentally in our project, but it's not a part of the final deliverable.
+ */
+
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;

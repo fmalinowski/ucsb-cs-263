@@ -47,7 +47,7 @@ import com.google.appengine.api.taskqueue.*;
  * Directions API. After fetching the waypoints, a background task is started (WaypointsReview) to get
  * reviews and ratings for these waypoints.
  *
- * TODO
+ *
  * Since some routes may include a long travel distance between any two consecutive steps, some potential
  * waypoints may not be captured by this algorithm.
  * A better way to do it would be to use RouteBoxer

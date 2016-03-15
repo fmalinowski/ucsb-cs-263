@@ -1,5 +1,9 @@
 package goplaces.models;
 
+/**
+ * Objects of this class are used for accepting JSON corresponding to a string of place_ids.
+ */
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

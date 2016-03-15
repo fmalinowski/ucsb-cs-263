@@ -1,5 +1,9 @@
 package goplaces.models;
 
+/**
+ * Class to represent real world routes.
+ */
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
@@ -30,7 +34,7 @@ public class Route {
 	
 	private ArrayList<Waypoint> waypoints = new ArrayList<Waypoint>(); 
 	private Text mapJsonAsText;
-	
+
 	public Route() {
 	}
 	

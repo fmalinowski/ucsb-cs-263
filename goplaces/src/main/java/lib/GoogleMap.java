@@ -13,7 +13,7 @@ import org.json.JSONObject;
 
 import java.util.logging.Logger;
 
-/** This class implements methods for accessing various Google Map APIs.
+/** This class implements methods for accessing various Google APIs.
  * @author Francois Malinowski
  * @author Aviral Takkar
  */

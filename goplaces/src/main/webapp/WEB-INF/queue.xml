@@ -1,3 +1,5 @@
+<!-- Using default pull queue -->
+
 <queue-entries>
  <queue>
   <name>default</name>

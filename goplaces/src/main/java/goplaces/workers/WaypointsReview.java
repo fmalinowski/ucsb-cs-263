@@ -55,8 +55,8 @@ import com.google.appengine.api.taskqueue.*;
  * for a particular place are available as yet.
  *
  *
- * TODO
- * One potential problem is : the list of places is not unique many times
+ *
+ * One potential problem is that the list of places is not unique many times.
  * This class first checks for existence of the place details locally in the datastore,
  * before making a Google API request.
  * Use a background task to fetch reviews instead of doing them in the

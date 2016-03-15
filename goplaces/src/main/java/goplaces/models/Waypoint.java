@@ -1,5 +1,9 @@
 package goplaces.models;
 
+/**
+ * Object to represent a place in the context of a keyword for it.
+ */
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;

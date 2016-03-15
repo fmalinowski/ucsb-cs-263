@@ -1,5 +1,9 @@
 package goplaces.models;
 
+/**
+ * Object to which client messages to get custom routes are deserialized to.
+ */
+
 import java.util.ArrayList;
 
 import javax.xml.bind.annotation.XmlAccessType;
