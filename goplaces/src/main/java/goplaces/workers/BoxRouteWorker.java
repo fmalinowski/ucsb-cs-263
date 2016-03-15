@@ -73,7 +73,7 @@ public class BoxRouteWorker extends HttpServlet {
 			JSONArray steps = (JSONArray)((JSONObject)legs.get(0)).get("steps");
 			
 			String routeID = request.getParameter("routeid");
-			System.out.println("Route steps loaded in a JSONArray...size is " + steps.size());
+			//System.out.println("Route steps loaded in a JSONArray...size is " + steps.size());
 
             List<Double> stepLats = new ArrayList<Double>();
             List<Double> stepLngs = new ArrayList<Double>();
@@ -84,10 +84,10 @@ public class BoxRouteWorker extends HttpServlet {
                 stepLats.add(Double.parseDouble(temp.get("lat").toString()));
                 stepLngs.add(Double.parseDouble(temp.get("lng").toString()));    
             }   
-            System.out.println("All steps set with size " + stepLngs.size() + " and " + stepLats.size());
+           // System.out.println("All steps set with size " + stepLngs.size() + " and " + stepLats.size());
 
 
-            System.out.println("Skipping route boxer...");
+            //System.out.println("Skipping route boxer...");
             //RouteBoxer routeBoxer = new RouteBoxer(stepLats, stepLngs, Double.parseDouble(request.getParameter("radius")));
             
             //if(routeBoxer.getFlag())
@@ -133,7 +133,7 @@ public class BoxRouteWorker extends HttpServlet {
             Text placesJsonAsText = new Text(finalPlacesJSONObject.toJSONString());
             originalRouteEntity.setProperty("placesJSON", placesJsonAsText);
             datastore.put(originalRouteEntity);                
-            System.out.println("SUCCESS written places to datastore");
+            //System.out.println("SUCCESS written places to datastore");
 
 			// add task for fetching place reviews to queue
             QueueFactory.getDefaultQueue().add(TaskOptions.Builder.withUrl("/waypointsreview").param("places", place_ids.toString()));

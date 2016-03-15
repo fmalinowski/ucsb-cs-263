@@ -63,18 +63,18 @@ public class PlaceDetailsResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getPlaceDetails(@QueryParam("place_id") String place_id, @Context HttpServletResponse servletResponse) {
 		JSONObject answer = new JSONObject();
-		System.out.println("Place id is " + place_id);
+		//System.out.println("Place id is " + place_id);
 		try{
 			Entity place_details = (Entity)syncCache.get("place-"+place_id);
 			if(place_details != null){
-				System.out.println("Place details in memcache (and datastore) for " + place_id);
+				//System.out.println("Place details in memcache (and datastore) for " + place_id);
 				return answer.put("status","OK").put("result",(String)place_details.getProperty("rating") + "/&/" +
 						((Text)place_details.getProperty("reviews")).getValue()).toString();
 			}
 			
 			Entity place_details_entity = datastore.get(KeyFactory.createKey("Place", place_id));
 			if(place_details_entity != null){
-				System.out.println("Place details in datastore for " + place_id);
+				//System.out.println("Place details in datastore for " + place_id);
 				return answer.put("status","OK").put("result",(String)place_details_entity.getProperty("rating") +
 						"/&/" + ((Text)place_details_entity.getProperty("reviews")).getValue()).toString();
 			}

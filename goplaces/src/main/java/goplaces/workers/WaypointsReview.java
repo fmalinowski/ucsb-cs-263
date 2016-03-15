@@ -84,22 +84,22 @@ public class WaypointsReview extends HttpServlet {
 		StringBuilder place_ids_builder = new StringBuilder(request.getParameter("places")).deleteCharAt(0);
 		place_ids_builder.deleteCharAt(place_ids_builder.length() - 1);
 
-		System.out.println("WaypointsReview place ids received: " + place_ids_builder);
+		//System.out.println("WaypointsReview place ids received: " + place_ids_builder);
 		String[] place_ids = place_ids_builder.toString().split(",");
 
-		System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
+		//System.out.println("WAYPOINTSREVIEW Number of places: " + place_ids.length);
 		int count = 0;
 
 		for (String place : place_ids) {
-			System.out.println("Place ID: " + place);
+			//System.out.println("Place ID: " + place);
 			try {
 				if (syncCache.get("place-" + place) != null) {
 
-					System.out.println("Place details in memcache (and datastore) for " + place);
+		//			System.out.println("Place details in memcache (and datastore) for " + place);
 					continue;
 				}
 				if (datastore.get(KeyFactory.createKey("Place", place)) != null) {
-					System.out.println("Place details already in datastore for " + place);
+		//			System.out.println("Place details already in datastore for " + place);
 
 					continue;
 				}
@@ -108,16 +108,18 @@ public class WaypointsReview extends HttpServlet {
 				count++;
 			}
 			JSONObject place_result;
+			Entity placeEntity;
 			try {
 				place_result = (JSONObject) ((JSONObject) GoogleMap.getPlaceDetails(place.trim())).get("result");
-				System.out.println("Place id: " + place_result.get("place_id"));
-				System.out.println(" rating " + place_result.getDouble("rating"));
-				System.out.println(" reviews " + place_result.get("reviews").toString());
+		//		System.out.println("Place id: " + place_result.get("place_id"));
+		//		System.out.println(" rating " + place_result.getDouble("rating"));
+		//		System.out.println(" reviews " + place_result.get("reviews").toString());
+				placeEntity = new Entity("Place", (String)place_result.get("place_id"));
 			} catch (Exception e) {
 				System.out.println("WAYPOINTSREVIEW ERROR " + e.getMessage());
 				continue;
 			}
-			Entity placeEntity = new Entity("Place", (String)place_result.get("place_id"));
+
 
 			//try to set rating, if available
 			try {
