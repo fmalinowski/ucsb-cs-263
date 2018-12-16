@@ -2,6 +2,8 @@
 
 Please see the [turnin directory](https://github.com/aviral26/ucsb-cs-263/tree/master/goplaces/turnin) for project artifacts.
 
+All the UCSB assignments for the class cs263 are in the folder ucsb-cs263-old-assignments
+
 Go places is a web app based on Google App Engine.
 The web app can be found at this address: [http://go-places-ucsb.appspot.com](http://go-places-ucsb.appspot.com)
 
