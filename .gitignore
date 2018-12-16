@@ -1,4 +1,5 @@
 *.class
+*.iml
 ucsb-cs263-old-assignments/base/base.iml
 goplaces.iml
 # Mobile Tools for Java (J2ME)
