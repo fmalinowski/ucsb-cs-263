@@ -1,6 +1,6 @@
 *.class
-base_project/base/base.iml
-goplaces/goplaces.iml
+ucsb-cs263-old-assignments/base/base.iml
+goplaces.iml
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 .idea/*
@@ -8,18 +8,22 @@ goplaces/goplaces.iml
 *.jar
 *.war
 *.ear
-base_project/base/src/main/main1.iml
-goplaces/.idea/
+ucsb-cs263-old-assignmentsbase/src/main/main1.iml
+.idea/
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 # Google App Engine generated folder
 appengine-generated/
-base_project/base/target/
-base_project/credentials.txt
-base/target/
-goplaces/src/main/main.iml
-goplaces/src/test/test.iml
+
+ucsb-cs263-old-assignments/base/target/
+ucsb-cs263-old-assignments/credentials.txt
+ucsb-cs263-old-assignments/target/
+
+src/main/main.iml
+src/test/test.iml
 # tmp files
 *.*~
 .DS_Store
+
+target/
